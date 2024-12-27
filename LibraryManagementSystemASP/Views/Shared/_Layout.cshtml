@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using LibraryManagementSystemASP.Models
+
+@{
+    var currentUser = UserSession.GetInstance().CurrentUser;
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -16,11 +21,12 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 250px;
+            width: 300px;
             flex-direction: column;
+            
         }
         .container {
-            margin-left: 250px;
+            margin-left: 300px;
             padding-top: 20px;
         }
         .container.full-width {
@@ -32,11 +38,11 @@
 
     @if (UserSession.GetInstance().CurrentUser != null && !string.IsNullOrEmpty(UserSession.GetInstance().CurrentUser.Role))
     {
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-right box-shadow">
+        <nav class="navbar navbar-expand-lg navbar-light lms-primary-bg border-right box-shadow pt-5">
             <div class="container-fluid flex-column">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Dashboard</a>
-                <div class="navbar-collapse d-sm-inline-flex flex-column">
-                    <ul class="navbar-nav flex-column">
+                <p class="text-white fs-3 fw-bold">Dashboard</p>
+                <div class="navbar-collapse d-sm-inline-flex flex-column mt-5 align-items-start">
+                    <ul class="navbar-nav flex-column align-items-start">
                         @if (UserSession.GetInstance().CurrentUser != null)
                             {
                             var role = UserSession.GetInstance().CurrentUser.Role;
@@ -44,24 +50,55 @@
                             if (role == "Admin")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Admin" asp-action="AdminDashboard">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Admin" asp-action="AdminBookManagement">Book Management</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Admin" asp-action="AdminUserManagement">User Management</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Admin" asp-action="AdminRecords">Records</a>
                                 </li>
                             }
                             else if (role == "Librarian")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Librarian" asp-action="Index">Librarian Dashboard</a>
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Librarian" asp-action="LibrarianDashboard">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Librarian" asp-action="LibrarianBookListings">Book Listings</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Librarian" asp-action="LibrarianOperationsManagement">Operations Management</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Librarian" asp-action="LibrarianRecords">Records</a>
                                 </li>
                             }
                             else if (role == "Reader")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Reader" asp-action="Index">Reader Dashboard</a>
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Reader" asp-action="ReaderDashboard">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Reader" asp-action="ReaderBrowseBooks">Browse Books</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Reader" asp-action="ReaderReservations">Reservations</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Reader" asp-action="ReaderBorrowing">Borrowing</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Reader" asp-action="ReaderProfile">Profile Page</a>
                                 </li>
                             }
                         }
                     </ul>
                 </div>
+                <p class="footer text-center text-white fs-5 fw-normal">@currentUser?.Username</p>
             </div>
         </nav>
     }

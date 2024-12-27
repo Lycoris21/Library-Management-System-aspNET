@@ -1,5 +1,7 @@
 ﻿// Utilities/PasswordHasher.cs
-using Microsoft.AspNetCore.Identity;
+using System;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace LibraryManagementSystemASP.Utilities
 {
@@ -7,15 +9,38 @@ namespace LibraryManagementSystemASP.Utilities
     {
         public static string HashPassword(string password)
         {
-            var hasher = new PasswordHasher<object>();
-            return hasher.HashPassword(null, password);
+            // Handle null or empty password
+            if (string.IsNullOrEmpty(password))
+            {
+                return string.Empty;
+            }
+
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                // Convert the password to bytes and compute the hash
+                byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                StringBuilder sb = new StringBuilder();
+                foreach (byte b in hashedBytes)
+                {
+                    sb.Append(b.ToString("x2")); // Format as hexadecimal
+                }
+                return sb.ToString();
+            }
         }
 
-        public static bool VerifyPassword(string enteredPassword, string storedHashedPassword)
+        public static bool VerifyPassword(string inputPassword, string storedPassword)
         {
-            var hasher = new PasswordHasher<object>();
-            var result = hasher.VerifyHashedPassword(null, storedHashedPassword, enteredPassword);
-            return result == PasswordVerificationResult.Success;
+            // Handle null cases
+            if (inputPassword == null || storedPassword == null)
+            {
+                return false;
+            }
+
+            // Hash the input password
+            string hashedInputPassword = HashPassword(inputPassword);
+
+            // Check if the hashed input matches the stored password
+            return hashedInputPassword.Equals(storedPassword, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

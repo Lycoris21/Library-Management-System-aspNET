@@ -8,5 +8,20 @@ namespace LibraryManagementSystemASP.Controllers
         {
             return View();
         }
+
+        public IActionResult LibrarianBookListings()
+        {
+            return View();
+        }
+
+        public IActionResult LibrarianOperationsManagement()
+        {
+            return View();
+        }
+
+        public IActionResult LibrarianRecords()
+        {
+            return View();
+        }
     }
 }

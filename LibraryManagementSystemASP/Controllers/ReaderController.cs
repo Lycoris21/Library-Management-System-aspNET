@@ -8,5 +8,26 @@ namespace LibraryManagementSystemASP.Controllers
         {
             return View();
         }
+
+        public IActionResult ReaderBrowseBooks()
+        {
+            return View();
+        }
+
+        public IActionResult ReaderReservations()
+        {
+            return View();
+        }
+
+        public IActionResult ReaderBorrowing()
+        {
+            return View();
+        }
+
+        public IActionResult ReaderProfile()
+        {
+            return View();
+        }
+
     }
 }

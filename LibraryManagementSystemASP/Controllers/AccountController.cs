@@ -70,6 +70,7 @@ namespace LibraryManagementSystemASP.Controllers
         // GET: Register
         public IActionResult Register()
         {
+            ViewBag.RegistrationSuccess = false;
             return View();
         }
 
