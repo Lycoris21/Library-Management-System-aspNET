@@ -27,10 +27,10 @@ namespace LibraryManagementSystemASP.Services
                             UserId = g.Key.UserId,
                             Username = g.Key.Username,
                             Role = g.Key.Role,
-                            CurrentlyReserved = g.Count(x => x.Reservation != null && x.Reservation.Status == "Pending"),
-                            CurrentlyBorrowed = g.Count(x => x.Borrow != null && x.Borrow.Status == "Borrowed"),
-                            Overdues = g.Count(x => x.Borrow != null && x.Borrow.Status == "Overdue"),
-                            TotalBorrowed = g.Count(x => x.Borrow != null) // This counts all borrowings regardless of status
+                            CurrentlyReserved = g.Select(x => x.Reservation).Where(x => x != null && x.Status == "Pending").Distinct().Count(),
+                            CurrentlyBorrowed = g.Select(x => x.Borrow).Where(x => x != null && x.Status == "Borrowed").Distinct().Count(),
+                            Overdues = g.Select(x => x.Borrow).Where(x => x != null && x.Status == "Overdue").Distinct().Count(),
+                            TotalBorrowed = g.Select(x => x.Borrow).Where(x => x != null).Distinct().Count() // This counts all borrowings regardless of status
                         };
 
             return query.ToList();

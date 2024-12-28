@@ -2,6 +2,7 @@
 using LibraryManagementSystemASP.Models;
 using LibraryManagementSystemASP.Services;
 using Microsoft.AspNetCore.Mvc;
+using LibraryManagementSystemASP.Utilities;
 
 namespace LibraryManagementSystemASP.Controllers
 {
@@ -85,8 +86,7 @@ namespace LibraryManagementSystemASP.Controllers
 
         public IActionResult AdminUserManagement()
         {
-            var users = _context.Users.ToList();
-            var models = users.Select(user => new AdminUserManagementViewModel
+            var users = _context.Users.Select(user => new AdminUserManagementViewModel
             {
                 UserId = user.UserId,
                 Username = user.Username,
@@ -94,10 +94,10 @@ namespace LibraryManagementSystemASP.Controllers
                 CurrentlyReserved = user.Reservations.Count(r => r.Status == "Pending"),
                 CurrentlyBorrowed = user.Borrowings.Count(b => b.Status == "Borrowed"),
                 Overdues = user.Borrowings.Count(b => b.Status == "Overdue"),
-                TotalBorrowed = user.Borrowings.Count
+                TotalBorrowed = user.Borrowings.Count()
             }).ToList();
 
-            return View(models);
+            return View(users);
         }
 
         // Add User
@@ -134,9 +134,14 @@ namespace LibraryManagementSystemASP.Controllers
                 if (user != null)
                 {
                     user.Username = model.Username;
-                    user.Password = model.Password;
                     user.Role = model.Role;
                     user.UpdatedAt = DateTime.Now;
+
+                    // Check if the password has changed
+                    if (!PasswordHasher.VerifyPassword(model.Password, user.Password))
+                    {
+                        user.Password = PasswordHasher.HashPassword(model.Password);
+                    }
 
                     _context.Users.Update(user);
                     _context.SaveChanges();
