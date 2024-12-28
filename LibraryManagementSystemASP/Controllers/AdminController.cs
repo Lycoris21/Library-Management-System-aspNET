@@ -3,6 +3,7 @@ using LibraryManagementSystemASP.Models;
 using LibraryManagementSystemASP.Services;
 using Microsoft.AspNetCore.Mvc;
 using LibraryManagementSystemASP.Utilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystemASP.Controllers
 {
@@ -128,7 +129,7 @@ namespace LibraryManagementSystemASP.Controllers
         [HttpPost]
         public IActionResult EditUser(AdminUserManagementViewModel model)
         {
-            
+
             var user = _context.Users.FirstOrDefault(u => u.UserId == model.UserId);
             if (user != null)
             {
@@ -165,7 +166,67 @@ namespace LibraryManagementSystemASP.Controllers
 
         public IActionResult AdminRecords()
         {
-            return View();
+            var reservationRecords = from user in _context.Users
+                                     join reservation in _context.Reservations on user.UserId equals reservation.UserId
+                                     join book in _context.Books on reservation.BookId equals book.BookId
+                                     select new RecordsViewModel
+                                     {
+                                         Username = user.Username,
+                                         Title = book.Title,
+                                         Status = reservation.Status,
+                                         LastUpdated = (DateTime)reservation.UpdatedAt,
+                                         RecordType = "Reservation",
+                                         RecordId = reservation.ReservationId
+                                     };
+
+            var borrowingRecords = from user in _context.Users
+                                   join borrowing in _context.Borrowings on user.UserId equals borrowing.UserId
+                                   join book in _context.Books on borrowing.BookId equals book.BookId
+                                   select new RecordsViewModel
+                                   {
+                                       Username = user.Username,
+                                       Title = book.Title,
+                                       Status = borrowing.Status,
+                                       LastUpdated = (DateTime)borrowing.UpdatedAt,
+                                       RecordType = "Borrowing",
+                                       RecordId = borrowing.BorrowId
+                                   };
+
+            var records = reservationRecords.Union(borrowingRecords)
+                                    .OrderByDescending(r => r.LastUpdated)
+                                    .ToList();
+
+            return View(records);
+        }
+
+        public IActionResult GetRecordDetails(string recordType, int recordId)
+        {
+            if (recordType == "Reservation")
+            {
+                var reservation = _context.Reservations
+                    .Include(r => r.User)
+                    .Include(r => r.Book)
+                    .FirstOrDefault(r => r.ReservationId == recordId);
+
+                if (reservation != null)
+                {
+                    return PartialView("_Details", reservation);
+                }
+            }
+            else if (recordType == "Borrowing")
+            {
+                var borrowing = _context.Borrowings
+                    .Include(b => b.User)
+                    .Include(b => b.Book)
+                    .FirstOrDefault(b => b.BorrowId == recordId);
+
+                if (borrowing != null)
+                {
+                    return PartialView("_Details", borrowing);
+                }
+            }
+
+            return NotFound();
         }
     }
 }

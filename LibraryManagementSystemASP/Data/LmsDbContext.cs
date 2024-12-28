@@ -93,6 +93,10 @@ public partial class LmsDbContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("status");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Book).WithMany(p => p.Borrowings)
@@ -116,13 +120,20 @@ public partial class LmsDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
-            entity.Property(e => e.ReservedUntil)
+            entity.Property(e => e.CollectionDeadline)
                 .HasColumnType("datetime")
-                .HasColumnName("reserved_until");
+                .HasColumnName("collection_deadline");
+            entity.Property(e => e.CollectedOn)
+                .HasColumnType("datetime")
+                .HasColumnName("collected_on");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .IsUnicode(false)
-                .HasColumnName("status");
+                .HasColumnName("status"); 
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Book).WithMany(p => p.Reservations)

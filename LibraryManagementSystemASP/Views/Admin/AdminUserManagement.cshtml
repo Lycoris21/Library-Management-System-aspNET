@@ -258,6 +258,37 @@
             }
         });
 
+        // Search functionality when 'Search' button is clicked or 'Enter' key is pressed
+        document.getElementById('search').addEventListener('keypress', function(event) {
+            // Trigger search if Enter key is pressed
+            if (event.key === 'Enter') {
+                filterUsers();
+            }
+        });
+
+        document.querySelector('.btn-custom').addEventListener('click', function() {
+            filterUsers();
+        });
+
+        function filterUsers() {
+            var searchValue = document.getElementById('search').value.toLowerCase();
+            var rows = document.querySelectorAll('#userTableBody tr');
+
+            rows.forEach(function(row) {
+                var cells = row.querySelectorAll('td');
+                var matches = false;
+
+                // Check if any cell contains the search value
+                cells.forEach(function(cell) {
+                    if (cell.innerText.toLowerCase().includes(searchValue)) {
+                        matches = true;
+                    }
+                });
+
+                // Show or hide the row based on whether it matches the search query
+                row.style.display = matches ? '' : 'none';
+            });
+        }
 
     </script>
 </body>

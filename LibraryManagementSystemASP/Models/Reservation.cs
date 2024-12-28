@@ -13,9 +13,11 @@ public partial class Reservation
 
     public string Status { get; set; } = null!;
 
-    public DateTime ReservedUntil { get; set; }
+    public DateTime CollectionDeadline { get; set; }
+    public DateTime CollectedOn { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public virtual Book Book { get; set; } = null!;
 
