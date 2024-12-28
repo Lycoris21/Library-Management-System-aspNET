@@ -128,29 +128,25 @@ namespace LibraryManagementSystemASP.Controllers
         [HttpPost]
         public IActionResult EditUser(AdminUserManagementViewModel model)
         {
-            if (ModelState.IsValid)
+            
+            var user = _context.Users.FirstOrDefault(u => u.UserId == model.UserId);
+            if (user != null)
             {
-                var user = _context.Users.FirstOrDefault(u => u.UserId == model.UserId);
-                if (user != null)
+                user.Username = model.Username;
+                user.Role = model.Role;
+                user.UpdatedAt = DateTime.Now;
+
+                // Update the password only if a new password is provided
+                if (!string.IsNullOrEmpty(model.Password))
                 {
-                    user.Username = model.Username;
-                    user.Role = model.Role;
-                    user.UpdatedAt = DateTime.Now;
-
-                    // Check if the password has changed
-                    if (!PasswordHasher.VerifyPassword(model.Password, user.Password))
-                    {
-                        user.Password = PasswordHasher.HashPassword(model.Password);
-                    }
-
-                    _context.Users.Update(user);
-                    _context.SaveChanges();
+                    user.Password = PasswordHasher.HashPassword(model.Password);
                 }
 
-                return RedirectToAction("AdminUserManagement");
+                _context.Users.Update(user);
+                _context.SaveChanges();
             }
 
-            return View("AdminUserManagement", _context.Users.ToList());
+            return RedirectToAction("AdminUserManagement");
         }
 
         // Delete User
