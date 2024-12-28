@@ -169,6 +169,7 @@ namespace LibraryManagementSystemASP.Controllers
             var reservationRecords = from user in _context.Users
                                      join reservation in _context.Reservations on user.UserId equals reservation.UserId
                                      join book in _context.Books on reservation.BookId equals book.BookId
+                                     where reservation.Status != "Collected"
                                      select new RecordsViewModel
                                      {
                                          Username = user.Username,
@@ -193,8 +194,8 @@ namespace LibraryManagementSystemASP.Controllers
                                    };
 
             var records = reservationRecords.Union(borrowingRecords)
-                                    .OrderByDescending(r => r.LastUpdated)
-                                    .ToList();
+                                            .OrderByDescending(r => r.LastUpdated)
+                                            .ToList();
 
             return View(records);
         }

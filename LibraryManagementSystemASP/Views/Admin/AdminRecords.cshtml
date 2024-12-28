@@ -47,9 +47,9 @@
                 <input type="text" id="search" class="form-control ms-2" placeholder="Search records">
             </div>
             <div class="col-md-6 d-flex align-items-end">
-                <button class="btn btn-custom ms-2">Search</button>
-                <button class="btn btn-custom ms-2">Reservations</button>
-                <button class="btn btn-custom ms-2">Borrowing</button>
+                <button class="btn btn-custom ms-2" onclick="filterRecords()">Search</button>
+                <button class="btn btn-custom ms-2" onclick="filterByType('Reservation')">Reservations</button>
+                <button class="btn btn-custom ms-2" onclick="filterByType('Borrowing')">Borrowing</button>
             </div>
         </div>
         <h2 class="mt-3">Records</h2>
@@ -67,7 +67,7 @@
                 <tbody id="recordTableBody">
                     @foreach (var record in Model)
                     {
-                        <tr>
+                        <tr data-type="@record.RecordType">
                             <td>@record.Username</td>
                             <td>@record.Title</td>
                             <td>@record.Status</td>
@@ -105,52 +105,65 @@
         </div>
     </div>
 
-    <script>
-        function loadDetails(recordType, recordId) {
-            $.ajax({
-                url: '@Url.Action("GetRecordDetails", "Admin")',
-                type: 'GET',
-                data: { recordType: recordType, recordId: recordId },
-                success: function (data) {
-                    $('#modal-body-content').html(data);
-                },
-                error: function () {
-                    $('#modal-body-content').html('<p>An error occurred while loading details.</p>');
+    @section Scripts {
+        <script>
+            document.getElementById('search').addEventListener('keypress', function(event) {
+                // Trigger search if Enter key is pressed
+                if (event.key === 'Enter') {
+                    filterRecords();
                 }
             });
-        }
+            function filterRecords() {
+                var searchValue = document.getElementById('search').value.toLowerCase();
+                var rows = document.querySelectorAll('#recordTableBody tr');
 
-        // Search functionality when 'Search' button is clicked or 'Enter' key is pressed
-        document.getElementById('search').addEventListener('keypress', function(event) {
-            // Trigger search if Enter key is pressed
-            if (event.key === 'Enter') {
-                filterRecords();
+                rows.forEach(function(row) {
+                    var cells = row.querySelectorAll('td');
+                    var matches = false;
+
+                    cells.forEach(function(cell) {
+                        if (cell.innerText.toLowerCase().includes(searchValue)) {
+                            matches = true;
+                        }
+                    });
+
+                    row.style.display = matches ? '' : 'none';
+                });
             }
-        });
 
-        document.querySelector('.btn-custom').addEventListener('click', function() {
-            filterRecords();
-        });
+            function filterByType(recordType) {
+                var rows = document.querySelectorAll('#recordTableBody tr');
 
-        function filterRecords() {
-            var searchValue = document.getElementById('search').value.toLowerCase();
-            var rows = document.querySelectorAll('#recordTableBody tr');
+                rows.forEach(function(row) {
+                    var type = row.getAttribute('data-type');
+                    row.style.display = (type === recordType) ? '' : 'none';
+                });
+            }
 
-            rows.forEach(function(row) {
-                var cells = row.querySelectorAll('td');
-                var matches = false;
+                function loadDetails(recordType, recordId) {
+                var modalBodyContent = document.getElementById('modal-body-content');
+                modalBodyContent.innerHTML = '';
 
-                // Check if any cell contains the search value
-                cells.forEach(function(cell) {
-                    if (cell.innerText.toLowerCase().includes(searchValue)) {
-                        matches = true;
+                var rows = document.querySelectorAll('#recordTableBody tr');
+
+                rows.forEach(function(row) {
+                    if (row.getAttribute('data-type') === recordType && row.querySelector('td').innerText == recordId) {
+                        var cells = row.querySelectorAll('td');
+                        var detailsHtml = '';
+
+                        cells.forEach(function(cell, index) {
+                            if (index < cells.length - 1) { // Exclude the 'More Details' button cell
+                                detailsHtml += '<p><strong>' + document.querySelector('thead th:nth-child(' + (index + 1) + ')').innerText + ':</strong> ' + cell.innerText + '</p>';
+                            }
+                        });
+
+                        modalBodyContent.innerHTML = detailsHtml;
                     }
                 });
 
-                // Show or hide the row based on whether it matches the search query
-                row.style.display = matches ? '' : 'none';
-            });
-        }
-    </script>
+                $('#detailsModal').modal('show');
+            }
+        </script>
+    }
 </body>
 </html>
