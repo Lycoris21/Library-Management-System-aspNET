@@ -57,11 +57,13 @@ namespace LibraryManagementSystemASP.Controllers
                     else
                     {
                         ModelState.AddModelError("", "Invalid username or password.");
+                        return View(model);
                     }
                 }
                 else
                 {
                     ModelState.AddModelError("", "Invalid username or password.");
+                    return View(model);
                 }
             }
             return View(model);
@@ -85,14 +87,14 @@ namespace LibraryManagementSystemASP.Controllers
                 var existingUser = _context.Users.SingleOrDefault(u => u.Username == model.Username);
                 if (existingUser != null)
                 {
-                    ModelState.AddModelError("Username", "Username already exists.");
+                    ModelState.AddModelError("", "Username already exists.");
                     return View(model);
                 }
 
                 // Check if passwords match
                 if (model.Password != model.ConfirmPassword)
                 {
-                    ModelState.AddModelError("Password", "Passwords do not match.");
+                    ModelState.AddModelError("", "Passwords do not match.");
                     return View(model);
                 }
 

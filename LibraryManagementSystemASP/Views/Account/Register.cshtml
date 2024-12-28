@@ -61,21 +61,19 @@
 <body>
     <div class="register-container">
         <h1>HIRAYA</h1>
+        <div asp-validation-summary="ModelOnly" class="text-danger list-unstyled"></div>
         <form asp-action="Register" method="post">
             <div class="mb-3 text-start">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" class="form-control" id="username" name="Username" required>
-                <span asp-validation-for="Username" class="text-danger"></span>
             </div>
             <div class="mb-3 text-start">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password" name="Password" required>
-                <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="mb-3 text-start">
                 <label for="confirmpassword" class="form-label">Confirm Password</label>
                 <input type="password" class="form-control" id="confirmpassword" name="ConfirmPassword" required>
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
             </div>
             <button type="submit" class="btn btn-primary">Register</button>
         </form>

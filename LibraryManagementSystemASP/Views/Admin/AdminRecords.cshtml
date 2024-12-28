@@ -73,8 +73,8 @@
                             <td>@record.Status</td>
                             <td>@record.LastUpdated.ToString("g")</td>
                             <td>
-                                <button class="btn btn-primary" data-toggle="modal" data-target="#detailsModal"
-                                        onclick="loadDetails('@record.RecordType', @record.RecordId)">
+                                <button class="btn btn-custom" data-toggle="modal" data-target="#detailsModal"
+                                        onclick="loadDetails('@record.RecordType', '@record.Username', '@record.Title')">
                                     More Details
                                 </button>
                             </td>
@@ -91,15 +91,13 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="detailsModalLabel">Record Details</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="modal-body-content">
                     <!-- Details will be loaded here -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -108,11 +106,11 @@
     @section Scripts {
         <script>
             document.getElementById('search').addEventListener('keypress', function(event) {
-                // Trigger search if Enter key is pressed
                 if (event.key === 'Enter') {
                     filterRecords();
                 }
             });
+
             function filterRecords() {
                 var searchValue = document.getElementById('search').value.toLowerCase();
                 var rows = document.querySelectorAll('#recordTableBody tr');
@@ -140,30 +138,26 @@
                 });
             }
 
-                function loadDetails(recordType, recordId) {
-                var modalBodyContent = document.getElementById('modal-body-content');
-                modalBodyContent.innerHTML = '';
-
-                var rows = document.querySelectorAll('#recordTableBody tr');
-
-                rows.forEach(function(row) {
-                    if (row.getAttribute('data-type') === recordType && row.querySelector('td').innerText == recordId) {
-                        var cells = row.querySelectorAll('td');
-                        var detailsHtml = '';
-
-                        cells.forEach(function(cell, index) {
-                            if (index < cells.length - 1) { // Exclude the 'More Details' button cell
-                                detailsHtml += '<p><strong>' + document.querySelector('thead th:nth-child(' + (index + 1) + ')').innerText + ':</strong> ' + cell.innerText + '</p>';
-                            }
-                        });
-
-                        modalBodyContent.innerHTML = detailsHtml;
+            function loadDetails(recordType, username, title) {
+                $.ajax({
+                    url: '@Url.Action("GetRecordDetails", "Admin")',
+                    type: 'GET',
+                    data: { recordType: recordType, username: username, title: title },
+                    success: function (data) {
+                        $('#modal-body-content').html(data);
+                        $('#detailsModal').modal('show');
+                    },
+                    error: function () {
+                        $('#modal-body-content').html('<p>An error occurred while loading details.</p>');
+                        $('#detailsModal').modal('show');
                     }
                 });
-
-                $('#detailsModal').modal('show');
             }
         </script>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     }
+    
 </body>
 </html>

@@ -1,7 +1,99 @@
 ﻿@{
     ViewData["Title"] = "Reader Profile Page";
+    var currentUser = LibraryManagementSystemASP.Models.UserSession.GetInstance().CurrentUser;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Reader Profile Page</h1>
-</div>
+<html>
+<head>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body{
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-container {
+            background-color: #00233D;
+            padding: 20px;
+            border-radius: 5px;
+            width: 500px;
+            margin: auto;
+        }
+
+        .form-control {
+            background-color: #316FA2;
+            border: 1px solid #316FA2;
+            color: white;
+        }
+
+        .btn-custom {
+            background-color: #316FA2;
+            border: 1px solid #316FA2;
+            color: white;
+        }
+
+        .full-height {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="px-5 full-height">
+        <div class="form-container">
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @ViewBag.ErrorMessage
+                </div>
+            }
+            @if (ViewBag.SuccessMessage != null)
+            {
+                <div class="alert alert-success" role="alert">
+                    @ViewBag.SuccessMessage
+                </div>
+            }
+            <form asp-action="UpdateProfile" method="post" onsubmit="return validateForm()">
+                <div class="mb-3">
+                    <label for="username" class="form-label text-white">Username:</label>
+                    <input type="text" class="form-control" id="username" name="username" value="@currentUser.Username">
+                </div>
+                <div class="mb-3">
+                    <label for="currentPassword" class="form-label text-white">Current Password:</label>
+                    <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+                </div>
+                <div class="mb-3">
+                    <label for="newPassword" class="form-label text-white">New Password:</label>
+                    <input type="password" class="form-control" id="newPassword" name="newPassword">
+                </div>
+                <div class="mb-3">
+                    <label for="confirmNewPassword" class="form-label text-white">Confirm New Password:</label>
+                    <input type="password" class="form-control" id="confirmNewPassword" name="confirmNewPassword">
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
+                    <button type="submit" class="mt5 btn btn-custom w-50">Confirm Changes</button>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        function validateForm() {
+            var currentPassword = document.getElementById('currentPassword').value;
+            var newPassword = document.getElementById('newPassword').value;
+            var confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            return true;
+        }
+    </script>
+</body>
+</html>

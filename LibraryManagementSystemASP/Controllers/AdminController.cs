@@ -200,14 +200,14 @@ namespace LibraryManagementSystemASP.Controllers
             return View(records);
         }
 
-        public IActionResult GetRecordDetails(string recordType, int recordId)
+        public IActionResult GetRecordDetails(string recordType, string username, string title)
         {
             if (recordType == "Reservation")
             {
                 var reservation = _context.Reservations
                     .Include(r => r.User)
                     .Include(r => r.Book)
-                    .FirstOrDefault(r => r.ReservationId == recordId);
+                    .FirstOrDefault(r => r.User.Username == username && r.Book.Title == title);
 
                 if (reservation != null)
                 {
@@ -219,7 +219,7 @@ namespace LibraryManagementSystemASP.Controllers
                 var borrowing = _context.Borrowings
                     .Include(b => b.User)
                     .Include(b => b.Book)
-                    .FirstOrDefault(b => b.BorrowId == recordId);
+                    .FirstOrDefault(b => b.User.Username == username && b.Book.Title == title);
 
                 if (borrowing != null)
                 {
