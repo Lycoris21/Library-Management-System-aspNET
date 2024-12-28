@@ -8,13 +8,15 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - LibraryManagementSystemASP</title>
+    <title>@ViewData["Title"] - LMS_ASP</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/LibraryManagementSystemASP.styles.css" asp-append-version="true" />
     <style>
         body {
             display: flex;
+            height: 100vh;
+            overflow: hidden;
         }
         .navbar {
             height: 100vh;
@@ -22,12 +24,13 @@
             top: 0;
             left: 0;
             width: 300px;
+            min-width: 300px;
             flex-direction: column;
             
         }
         .container {
             margin-left: 300px;
-            padding-top: 20px;
+            padding: 40px;
         }
         .container.full-width {
             margin-left: 65px; /* No margin when navbar is not present */
@@ -104,7 +107,7 @@
     }
 
     <div class="container @(UserSession.GetInstance().CurrentUser  == null ? "full-width" : "")">
-        <main role="main" class="pb-3">
+        <main role="main" class="pb-5">
             @RenderBody()
         </main>
     </div>

@@ -1,7 +1,85 @@
-﻿@{
+﻿@model LibraryManagementSystemASP.Models.AdminDashboardViewModel
+
+@{
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Admin Dashboard</h1>
-</div>
+<html>  
+<head>  
+   <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />  
+   <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />  
+   <link rel="stylesheet" href="~/LibraryManagementSystemASP.styles.css" asp-append-version="true" />  
+   <style>  
+       .card {  
+           background-color: #00203F;  
+           color: white;  
+           text-align: center;  
+           padding: 30px;  
+           margin: 10px;   
+           flex: 1;
+           margin-top: 20px;
+           height: 100%;
+       }  
+
+       .card h2 {  
+           font-size: 1.5rem;  
+           font-weight: bold;  
+       }  
+
+       .card p {  
+           font-size: 2.5rem;  
+           font-weight: bold;  
+       }
+       
+       .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; 
+        }
+    </style>  
+</head>  
+<body>  
+   <div class="px-5 col h-100">
+        <div class="row mb-5">
+            <div class="col-md-4 col-sm-6">  
+               <div class="card justify-content-center align-items-center">  
+                   <h2>BOOKS COUNT</h2>  
+                   <p>@Model.BooksCount</p>  
+               </div>  
+           </div>  
+           <div class="col-md-4 col-sm-6">
+                <div class="card justify-content-center align-items-center">
+                    <h2>USERS COUNT</h2>  
+                   <p>@Model.UsersCount</p>  
+               </div>  
+           </div>  
+           <div class="col-md-4 col-sm-6">
+                <div class="card justify-content-center align-items-center">
+                    <h2>RESERVATIONS COUNT</h2>  
+                   <p>@Model.ReservationsCount</p>  
+               </div>  
+           </div>
+        </div>
+        <div class="row">
+           <div class="col-md-4 col-sm-6">
+                <div class="card justify-content-center align-items-center">
+                    <h2>BORROWING COUNT</h2>  
+                   <p>@Model.BorrowingCount</p>  
+               </div>  
+           </div>  
+           <div class="col-md-4 col-sm-6">
+                <div class="card justify-content-center align-items-center">
+                    <h2>OVERDUE BOOKS COUNT</h2>  
+                   <p>@Model.OverdueBooksCount</p>  
+               </div>  
+           </div>  
+           <div class="col-md-4 col-sm-6">
+                <div class="card justify-content-center align-items-center">
+                    <h2>TOTAL BORROWED COUNT</h2>  
+                   <p>@Model.TotalBorrowedCount</p>  
+               </div>  
+           </div>  
+       </div>  
+   </div>  
+</body>  
+</html>

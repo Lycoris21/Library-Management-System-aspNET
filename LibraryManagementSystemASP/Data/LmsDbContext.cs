@@ -86,9 +86,9 @@ public partial class LmsDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("borrow_date");
-            entity.Property(e => e.ReturnDate)
+            entity.Property(e => e.SupposedReturnDate)
                 .HasColumnType("datetime")
-                .HasColumnName("return_date");
+                .HasColumnName("supposed_return_date");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .IsUnicode(false)

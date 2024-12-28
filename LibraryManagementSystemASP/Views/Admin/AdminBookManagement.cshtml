@@ -1,7 +1,305 @@
-﻿@{
+﻿@model List<LibraryManagementSystemASP.Models.Book>
+@{
     ViewData["Title"] = "Admin Book Management";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Admin Book Management</h1>
-</div>
+<html>
+<head>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .btn-custom {
+            background-color: #316FA2;
+            color: white;
+        }
+
+        .btn-custom-delete {
+            background-color: #c82333;
+            color: white;
+        }
+
+        .table thead th {
+            background-color: #00233D;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            margin-top: 0;
+        }
+
+        /* Prevent overflow and add scrollable body */
+        .table-container {
+            max-height: 500px; /* Adjust based on your requirement */
+            overflow-y: auto;
+            padding-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="px-5 h-100 mb-5">
+        <div class="row">
+            <div class="col-md-6 d-flex">
+                <input type="text" id="search" class="form-control ms-2" placeholder="Search for books">
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <button class="btn btn-custom ms-2">Search</button>
+                <button class="btn btn-custom ms-2" data-bs-toggle="modal" data-bs-target="#addBookModal">Add Book</button>
+            </div>
+        </div>
+        <h2 class="mt-3">Books</h2>
+        <div class="table-container">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>ISBN</th>
+                        <th>Publisher</th>
+                        <th>Year</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody id="bookTableBody">
+                    @foreach (var book in Model)
+                    {
+                        <tr>
+                            <td>@book.BookId</td>
+                            <td>@book.Title</td>
+                            <td>@book.Author</td>
+                            <td>@book.Category</td>
+                            <td>@book.Isbn</td>
+                            <td>@book.Publisher</td>
+                            <td>@book.PublishedYear</td>
+                            <td>@book.Quantity</td>
+                            <td>@book.Status</td>
+                            <td>
+                                <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#editBookModal"
+                                        data-book-id="@book.BookId" data-title="@book.Title" data-author="@book.Author"
+                                        data-category="@book.Category" data-isbn="@book.Isbn" data-publisher="@book.Publisher"
+                                        data-published-year="@book.PublishedYear" data-quantity="@book.Quantity" data-status="@book.Status">
+                                    Edit
+                                </button>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-custom-delete" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal" onclick="setBookId(@book.BookId)">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Book Modal -->
+    <div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="AddBook">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addBookModalLabel">Add Book</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Form fields for adding a book -->
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="title" class="form-label me-2" style="min-width: 100px;">Title</label>
+                            <input type="text" class="form-control" id="title" name="Title" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="author" class="form-label me-2" style="min-width: 100px;">Author</label>
+                            <input type="text" class="form-control" id="author" name="Author" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="category" class="form-label me-2" style="min-width: 100px;">Category</label>
+                            <input type="text" class="form-control" id="category" name="Category" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="isbn" class="form-label me-2" style="min-width: 100px;">ISBN</label>
+                            <input type="text" class="form-control" id="isbn" name="ISBN" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="publisher" class="form-label me-2" style="min-width: 100px;">Publisher</label>
+                            <input type="text" class="form-control" id="publisher" name="Publisher" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="publishedYear" class="form-label me-2" style="min-width: 100px;">Published Year</label>
+                            <input type="number" class="form-control" id="publishedYear" name="PublishedYear" value="2000" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="quantity" class="form-label me-2" style="min-width: 100px;">Quantity</label>
+                            <input type="number" class="form-control" id="quantity" name="Quantity" value="1" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="status" class="form-label me-2" style="min-width: 100px;">Status</label>
+                            <select class="form-select" id="status" name="Status" required>
+                                <option>Available</option>
+                                <option>Deleted</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-custom">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Book Modal -->
+    <div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="editBookModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="EditBook" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editBookModalLabel">Edit Book</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Form fields for editing a book -->
+                        <input type="hidden" id="editBookId" name="BookId">
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="editTitle" class="form-label me-2" style="min-width: 100px;">Title</label>
+                            <input type="text" class="form-control" id="editTitle" name="Title" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="editAuthor" class="form-label me-2" style="min-width: 100px;">Author</label>
+                            <input type="text" class="form-control" id="editAuthor" name="Author" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="editCategory" class="form-label me-2" style="min-width: 100px;">Category</label>
+                            <input type="text" class="form-control" id="editCategory" name="Category" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="editIsbn" class="form-label me-2" style="min-width: 100px;">ISBN</label>
+                            <input type="text" class="form-control" id="editIsbn" name="ISBN" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="editPublisher" class="form-label me-2" style="min-width: 100px;">Publisher</label>
+                            <input type="text" class="form-control" id="editPublisher" name="Publisher" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="editPublishedYear" class="form-label me-2" style="min-width: 100px;">Published Year</label>
+                            <input type="number" class="form-control" id="editPublishedYear" name="PublishedYear" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="editQuantity" class="form-label me-2" style="min-width: 100px;">Quantity</label>
+                            <input type="number" class="form-control" id="editQuantity" name="Quantity" required>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <label for="editStatus" class="form-label me-2" style="min-width: 100px;">Status</label>
+                            <select class="form-select" id="editStatus" name="Status" required>
+                                <option value="Available">Available</option>
+                                <option value="Deleted">Deleted</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-custom">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for confirmation -->
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this book?
+                </div>
+                <div class="modal-footer">
+                    <form method="post" id="deleteForm" action="@Url.Action("DeleteBook", "Admin")">
+                        <input type="hidden" name="bookId" id="bookIdToDelete" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        function setBookId(bookId) {
+          document.getElementById('bookIdToDelete').value = bookId;
+        }
+
+        var editModal = document.getElementById('editBookModal');
+        editModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            // Populate fields with data from the button attributes
+            document.getElementById('editBookId').value = button.getAttribute('data-book-id');
+            document.getElementById('editTitle').value = button.getAttribute('data-title');
+            document.getElementById('editAuthor').value = button.getAttribute('data-author');
+            document.getElementById('editCategory').value = button.getAttribute('data-category');
+            document.getElementById('editIsbn').value = button.getAttribute('data-isbn');
+            document.getElementById('editPublisher').value = button.getAttribute('data-publisher');
+            document.getElementById('editPublishedYear').value = button.getAttribute('data-published-year');
+            document.getElementById('editQuantity').value = button.getAttribute('data-quantity');
+
+            // Set the status dropdown based on the data
+            var statusSelect = document.getElementById('editStatus');
+            var status = button.getAttribute('data-status');
+            for (var i = 0; i < statusSelect.options.length; i++) {
+                if (statusSelect.options[i].value === status) {
+                    statusSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        });
+
+        // Search functionality when 'Search' button is clicked or 'Enter' key is pressed
+        document.getElementById('search').addEventListener('keypress', function(event) {
+            // Trigger search if Enter key is pressed
+            if (event.key === 'Enter') {
+                filterBooks();
+            }
+        });
+
+        document.querySelector('.btn-custom').addEventListener('click', function() {
+            filterBooks();
+        });
+
+        function filterBooks() {
+            var searchValue = document.getElementById('search').value.toLowerCase();
+            var rows = document.querySelectorAll('#bookTableBody tr');
+
+            rows.forEach(function(row) {
+                var cells = row.querySelectorAll('td');
+                var matches = false;
+
+                // Check if any cell contains the search value
+                cells.forEach(function(cell) {
+                    if (cell.innerText.toLowerCase().includes(searchValue)) {
+                        matches = true;
+                    }
+                });
+
+                // Show or hide the row based on whether it matches the search query
+                row.style.display = matches ? '' : 'none';
+            });
+        }
+    </script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -13,7 +13,7 @@ public partial class Borrowing
 
     public DateTime? BorrowDate { get; set; }
 
-    public DateTime ReturnDate { get; set; }
+    public DateTime SupposedReturnDate { get; set; }
 
     public DateTime? ActualReturnDate { get; set; }
 
