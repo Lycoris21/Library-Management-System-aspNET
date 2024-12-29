@@ -1,7 +1,211 @@
-﻿@{
+﻿@model LibraryManagementSystemASP.Models.DashboardViewModel
+
+@{
     ViewData["Title"] = "Reader Dashboard";
+    int rowCount = 1;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Reader Dashboard</h1>
-</div>
+<html>
+<head>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        .header {
+        background-color: #316FA2;
+        color: white;
+        text-align: center;
+        padding: 20px 0;
+        margin-bottom: 20px;
+        }
+
+        .header h1 {
+        margin: 0;
+        font-size: 24px;
+        }
+
+        .header p {
+        margin: 0;
+        font-size: 36px;
+        }
+
+        .section-title {
+        background-color: #00233D;
+        padding: 10px;
+        color: white;
+        font-weight: bold;
+        text-align: left;
+        border-bottom: 2px solid white;
+        }
+
+        .list-group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #316FA2;
+        color: white;
+        border: none;
+        padding: 10px;
+        min-height: 40px;
+        max-height: 40px;
+        }
+
+        .list-group-item:nth-child(odd) {
+        background-color: #316FA2;
+        }
+
+        .list-group-item:nth-child(even) {
+        background-color: #316FA2;
+        }
+
+        .list-group-item span {
+        font-size: 14px;
+        }
+
+        .list-group-item .title {
+        flex: 1;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-left: 10px;
+        }
+
+        .list-group-item .genre {
+        text-align: right;
+        margin-left: 10px;
+        }
+
+        .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #316FA2;
+        color: white;
+        border: none;
+        padding: 10px;
+        min-height: 40px;
+        max-height: 40px;
+        }
+
+        .transaction-item:nth-child(odd) {
+        background-color: #316FA2;
+        }
+
+        .transaction-item:nth-child(even) {
+        background-color: #316FA2;
+        }
+
+        .transaction-item span {
+        font-size: 14px;
+        }
+
+        .transaction-item .title {
+        flex: 1;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-left: 10px;
+        }
+
+        .transaction-item .datetime {
+        text-align: center;
+        margin-left: 10px;
+        }
+
+        .transaction-item .datetime div {
+        text-align: center;
+        }
+
+        .fixed-height {
+        min-height: 400px;
+        max-height: 400px;
+        background-color: #316FA2;
+        }
+
+        .fs-10px {
+        font-size: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="px-5 h-100 mb-5">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="header">
+                    <h1>RESERVATIONS</h1>
+                    <p>@Model.ReservationCount</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="header">
+                    <h1>BORROWING</h1>
+                    <p>@Model.BorrowingCount</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="header">
+                    <h1>OVERDUE</h1>
+                    <p>@Model.OverdueCount</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="section-title">Most Borrowed Books</div>
+                <ul class="list-group fixed-height">
+                    
+                    @foreach (var book in Model.MostBorrowedBooks)
+                    {
+                        <li class="list-group-item">
+                            <div class="fs-10px">@rowCount</div>
+                            <span class="title">@book.Title</span>
+                            <div class="genre fs-10px">@book.Category</div>
+                        </li>
+                        rowCount++;
+                    }
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <div class="section-title">Newest Books</div>
+                <ul class="list-group fixed-height">
+                    @{
+                        rowCount = 1;
+                    }
+                    @foreach (var book in Model.NewestBooks)
+                    {
+                        <li class="list-group-item">
+                            <div class="fs-10px">@rowCount</div>
+                            <span class="title">@book.Title</span>
+                            <div class="genre fs-10px">@book.Category</div>
+                        </li>
+                        rowCount++;
+                    }
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <div class="section-title">Latest Transactions</div>
+                <div class="fixed-height">
+                    @foreach (var transaction in Model.LatestTransactions)
+                    {
+                        <div class="transaction-item">
+                            <div class="fs-10px">@transaction.Status</div>
+                            <span class="title">@transaction.Book.Title</span>
+                            <span class="datetime">
+                                <div style="font-size: 10px;">
+                                    <div style="font-size: 10px;">
+                                        @transaction.UpdatedAt.ToString("yyyy-MM-dd")
+                                    </div>
+                                    <div style="font-size: 10px;">
+                                        @transaction.UpdatedAt.ToString("HH:mm:ss")
+                                    </div>
+                                </div>
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
