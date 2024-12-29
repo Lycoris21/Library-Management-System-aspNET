@@ -2,6 +2,135 @@
     ViewData["Title"] = "Librarian Book Listings";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Librarian Book Listings</h1>
-</div>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        .btn-custom {
+            background-color: #316FA2;
+            color: white;
+        }
+
+        .book-list {
+            height: 500px;
+            overflow-y: scroll;
+        }
+
+        .book-item {
+            background-color: #002147;
+            color: white;
+            padding: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reserve-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+            .reserve-btn:hover {
+                background-color: #0056b3;
+            }
+    </style>
+</head>
+<body>
+    <div class="px-5 h-100 mb-5">
+        <h2 class="mt-3">Available Books</h2>
+        <div class="book-list">
+            @foreach (var book in Model)
+            {
+                <div class="book-item">
+                    <div>
+                        <p>
+                            <strong>Title:</strong> @book.Title<br>
+                            <strong>Author:</strong> @book.Author<br>
+                            <strong>Category:</strong> @book.Category<br>
+                            <strong>ISBN:</strong> @book.Isbn
+                        </p>
+                    </div>
+                    <div>
+                        <p>
+                            <strong>Publisher:</strong> @book.Publisher<br>
+                            <strong>Published Year:</strong> @book.PublishedYear<br>
+                            <strong>Quantity:</strong> @book.Quantity
+                        </p>
+                    </div>
+                    <button class="reserve-btn" data-book-id="@book.BookId" data-bs-toggle="modal" data-bs-target="#confirmReservationModal">Reserve</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Confirm Reservation Modal -->
+    <div class="modal fade" id="confirmReservationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Reservation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to reserve this book?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-custom" id="confirmReserveButton">Yes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="notificationBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-custom" data-bs-dismiss="modal">Okay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            let selectedBookId = null;
+
+            // Open confirm reservation modal
+            document.querySelectorAll(".reserve-btn").forEach(button => {
+                button.addEventListener("click", () => {
+                    selectedBookId = button.getAttribute("data-book-id");
+                });
+            });
+
+            // Handle reservation confirmation
+            document.getElementById("confirmReserveButton").addEventListener("click", () => {
+                fetch(`/Librarian/ReserveBook/${selectedBookId}`, {
+                    method: "POST"
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("notificationTitle").textContent = data.title;
+                    document.getElementById("notificationBody").textContent = data.message;
+                    new bootstrap.Modal(document.getElementById("notificationModal")).show();
+                });
+                // Close the confirm reservation modal
+                new bootstrap.Modal(document.getElementById("confirmReservationModal")).hide();
+            });
+        });
+    </script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
