@@ -123,5 +123,57 @@ namespace LibraryManagementSystemASP.Controllers
             // If we got this far, something failed; redisplay the form
             return View(model);
         }
+
+        [HttpGet]
+        public IActionResult Profile()
+        {
+            var user = UserSession.GetInstance().CurrentUser;
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            ViewBag.Username = user.Username;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(string username, string currentPassword, string newPassword, string confirmNewPassword)
+        {
+            var currentUser = UserSession.GetInstance().CurrentUser;
+
+            if (currentUser != null && currentPassword == null)
+            {
+                ViewBag.ErrorMessage = "Please enter your password to confirm changes";
+                return View("Profile");
+            }
+            else if (currentUser != null && currentPassword != null && !PasswordHasher.VerifyPassword(currentPassword, currentUser.Password))
+            {
+                ViewBag.ErrorMessage = "The current password is incorrect.";
+                return View("Profile");
+            }
+
+            if (!string.IsNullOrEmpty(newPassword) && newPassword != confirmNewPassword)
+            {
+                ViewBag.ErrorMessage = "The new password and confirm password do not match.";
+                return View("Profile");
+            }
+
+            if (_context.Users.Any(u => u.Username == username && u.UserId != currentUser.UserId))
+            {
+                ViewBag.ErrorMessage = "The username is already taken.";
+                return View("Profile");
+            }
+
+            if (!string.IsNullOrEmpty(newPassword))
+            {
+                currentUser.Password = PasswordHasher.HashPassword(newPassword);
+            }
+
+            currentUser.Username = username;
+            _context.Users.Update(currentUser);
+            await _context.SaveChangesAsync();
+
+            ViewBag.SuccessMessage = "Changes saved.";
+
+            return View("Profile");
+        }
     }
 }

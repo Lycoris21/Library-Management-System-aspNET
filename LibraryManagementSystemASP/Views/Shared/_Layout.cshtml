@@ -64,6 +64,9 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-white" asp-area="" asp-controller="Admin" asp-action="AdminRecords">Records</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Account" asp-action="Profile">Profile Page</a>
+                                </li>
                             }
                             else if (role == "Librarian")
                             {
@@ -78,6 +81,9 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-white" asp-area="" asp-controller="Librarian" asp-action="LibrarianRecords">Records</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Account" asp-action="Profile">Profile Page</a>
                                 </li>
                             }
                             else if (role == "Reader")
@@ -95,7 +101,7 @@
                                     <a class="nav-link text-white" asp-area="" asp-controller="Reader" asp-action="ReaderBorrowing">Borrowing</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-white" asp-area="" asp-controller="Reader" asp-action="ReaderProfile">Profile Page</a>
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Account" asp-action="Profile">Profile Page</a>
                                 </li>
                             }
                         }

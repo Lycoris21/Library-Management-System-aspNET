@@ -51,10 +51,10 @@
             </div>
         </div>
         <h2 class="mt-3">Available Books</h2>
-        <div class="book-list">
+        <div class="book-list" id="book-list">
             @foreach (var book in Model)
             {
-                <div class="book-item">
+                <div class="book-item" data-title="@book.Title" data-author="@book.Author" data-category="@book.Category" data-isbn="@book.Isbn" data-publisher="@book.Publisher" data-published-year="@book.PublishedYear" data-quantity="@book.Quantity">
                     <div>
                         <p>
                             <strong>Title:</strong> @book.Title<br>
@@ -101,7 +101,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="notificationTitle"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></ button>
                 </div>
                 <div class="modal-body" id="notificationBody"></div>
                 <div class="modal-footer">
@@ -114,11 +114,14 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             let selectedBookId = null;
+            const confirmModal = new bootstrap.Modal(document.getElementById("confirmReservationModal"));
+            const notificationModal = new bootstrap.Modal(document.getElementById("notificationModal"));
 
             // Open confirm reservation modal
             document.querySelectorAll(".reserve-btn").forEach(button => {
                 button.addEventListener("click", () => {
                     selectedBookId = button.getAttribute("data-book-id");
+                    confirmModal.show(); // Show the modal
                 });
             });
 
@@ -127,50 +130,60 @@
                 fetch(`/Librarian/ReserveBook/${selectedBookId}`, {
                     method: "POST"
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     document.getElementById("notificationTitle").textContent = data.title;
                     document.getElementById("notificationBody").textContent = data.message;
-                    new bootstrap.Modal(document.getElementById("notificationModal")).show();
+                    notificationModal.show(); // Show the notification modal
+                    confirmModal.hide(); // Close the confirm reservation modal
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById("notificationTitle").textContent = "Error";
+                    document.getElementById("notificationBody").textContent = "An error occurred while reserving the book.";
+                    notificationModal.show(); // Show the notification modal in case of error
+                    confirmModal.hide(); // Close the confirm reservation modal
                 });
-                // Close the confirm reservation modal
-                new bootstrap.Modal(document.getElementById("confirmReservationModal")).hide();
             });
-        });
 
-        // Search functionality when 'Search' button is clicked or 'Enter' key is pressed
-        document.getElementById('search').addEventListener('keypress', function(event) {
-            // Trigger search if Enter key is pressed
-            if (event.key === 'Enter') {
+            // Search functionality when 'Search' button is clicked or 'Enter' key is pressed
+            document.getElementById('search').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    filterBooks();
+                }
+            });
+
+            document.querySelector('.btn-custom').addEventListener('click', function() {
                 filterBooks();
-            }
-        });
+            });
 
-        document.querySelector('.btn-custom').addEventListener('click', function() {
-            filterBooks();
-        });
+            function filterBooks() {
+                var searchValue = document.getElementById('search').value.toLowerCase();
+                var bookItems = document.querySelectorAll('.book-item');
 
-        function filterBooks() {
-            var searchValue = document.getElementById('search').value.toLowerCase();
-            var rows = document.querySelectorAll('#book-list');
+                bookItems.forEach(function(bookItem) {
+                    var title = bookItem.getAttribute('data-title').toLowerCase();
+                    var author = bookItem.getAttribute('data-author').toLowerCase();
+                    var category = bookItem.getAttribute('data-category').toLowerCase();
+                    var isbn = bookItem.getAttribute('data-isbn').toLowerCase();
+                    var publisher = bookItem.getAttribute('data-publisher').toLowerCase();
+                    var publishedYear = bookItem.getAttribute('data-published-year').toLowerCase();
+                    var quantity = bookItem.getAttribute('data-quantity').toLowerCase();
 
-            rows.forEach(function(row) {
-                var cells = row.querySelectorAll('td');
-                var matches = false;
-
-                // Check if any cell contains the search value
-                cells.forEach(function(cell) {
-                    if (cell.innerText.toLowerCase().includes(searchValue)) {
-                        matches = true;
+                    // Check if the search value matches any of the book attributes
+                    if (title.includes(searchValue) || author.includes(searchValue) || category.includes(searchValue) || isbn.includes(searchValue) || publisher.includes(searchValue) || publishedYear.includes(searchValue) || quantity.includes(searchValue)) {
+                        bookItem.style.display = ''; // Show the book item
+                    } else {
+                        bookItem.style.display = 'none'; // Hide the book item
                     }
                 });
-
-                // Show or hide the row based on whether it matches the search query
-                row.style.display = matches ? '' : 'none';
-            });
-        }
+            }
+        });
     </script>
-
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

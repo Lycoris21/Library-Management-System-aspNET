@@ -123,7 +123,6 @@ public partial class LmsDbContext : DbContext
                 {
                     tb.HasTrigger("trg_DecrementBookQuantityOnReservation");
                     tb.HasTrigger("trg_ReservationCollectedToBorrowing");
-                    tb.HasTrigger("trg_SetReservationCollectionDeadline");
                     tb.HasTrigger("trg_UpdateBookQuantityOnReservationStatusChange");
                     tb.HasTrigger("trg_UpdateCollectedAt");
                 });
