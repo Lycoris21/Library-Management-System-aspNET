@@ -1,0 +1,21 @@
+﻿@model LibraryManagementSystemASP.Models.Borrowing
+
+<div>
+    <p><strong>Row: </strong> <span id="modal-row-number"></span></p> <!-- Placeholder for the row number -->
+    <p><strong>Book Title: </strong> @Model.Book.Title</p>
+    <p><strong>Book Author:</strong> @Model.Book.Author</p>
+    <p><strong>Book Category:</strong> @Model.Book.Category</p>
+    <p><strong>Book ISBN:</strong> @Model.Book.Isbn</p>
+    <p><strong>Book Publisher:</strong> @Model.Book.Publisher</p>
+    <p><strong>Book Published Year:</strong> @Model.Book.PublishedYear</p>
+    <p><strong>Borrowing Status:</strong> @Model.Status</p>
+    <p><strong>Borrowed On:</strong> @Model.BorrowDate?.ToString("g")</p>
+    <p><strong>Supposed Return Date:</strong> @Model.SupposedReturnDate?.ToString("g")</p>
+    <p><strong>Actual Return Date:</strong> @Model.ActualReturnDate?.ToString("g")</p>
+    <p><strong>Updated At:</strong> @Model.UpdatedAt?.ToString("g")</p>
+</div>
+
+<script>
+    // Set the row number in the modal
+    document.getElementById('modal-row-number').innerText = $('#modal-body-content').attr('data-row-number');
+</script>
