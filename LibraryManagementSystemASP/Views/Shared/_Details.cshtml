@@ -9,15 +9,17 @@
         <p><strong>Book ID:</strong> @Model.Book.BookId</p>
         <p><strong>Book Title:</strong> @Model.Book.Title</p>
         <p><strong>Status:</strong> @Model.Status</p>
-        <p><strong>Collection Deadline:</strong> @Model.CollectionDeadline</p>
         <p><strong>Reserved On:</strong> @Model.CreatedAt</p>
+        <p><strong>Collection Deadline:</strong> @Model.CollectionDeadline</p>
         <p><strong>Updated At:</strong> @Model.UpdatedAt</p>
             
     }
     else if (Model is LibraryManagementSystemASP.Models.Borrowing borrowing)
     {
         <p><strong>Borrow ID:</strong> @Model.BorrowId</p>
+        <p><strong>User ID:</strong> @Model.User.UserId</p>
         <p><strong>Username:</strong> @Model.User.Username</p>
+        <p><strong>Book ID:</strong> @Model.Book.BookId</p>
         <p><strong>Book Title:</strong> @Model.Book.Title</p>
         <p><strong>Status:</strong> @Model.Status</p>
         <p><strong>Borrow Date:</strong> @Model.BorrowDate</p>

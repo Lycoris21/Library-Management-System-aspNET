@@ -1,7 +1,7 @@
 ﻿@model List<LibraryManagementSystemASP.Models.RecordsViewModel>
 
 @{
-    ViewData["Title"] = "Admin Records";
+    ViewData["Title"] = "Records";
 }
 
 <html>
@@ -140,7 +140,7 @@
 
             function loadDetails(recordType, username, title) {
                 $.ajax({
-                    url: '@Url.Action("GetRecordDetails", "Admin")',
+                    url: '@Url.Action("GetRecordDetails", "Shared")',
                     type: 'GET',
                     data: { recordType: recordType, username: username, title: title },
                     success: function (data) {
@@ -153,10 +153,14 @@
                     }
                 });
             }
+
+            // Ensure the modal closes properly
+            $('#detailsModal').on('hidden.bs.modal', function () {
+                $('#modal-body-content').empty(); // Clear the content when the modal is closed
+            });
         </script>
         <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     }
     
 </body>

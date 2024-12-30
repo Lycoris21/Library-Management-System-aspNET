@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Librarian Book Listings";
+    ViewData["Title"] = "Book Listings";
 }
 
 <html lang="en">
@@ -127,7 +127,7 @@
 
             // Handle reservation confirmation
             document.getElementById("confirmReserveButton").addEventListener("click", () => {
-                fetch(`/Librarian/ReserveBook/${selectedBookId}`, {
+                fetch(`/Shared/ReserveBook/${selectedBookId}`, {
                     method: "POST"
                 })
                 .then(response => {
