@@ -154,6 +154,23 @@
             </div>
         </div>
     </div>
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
+                    < button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="confirmationMessage">
+                    <!-- Confirmation message will be populated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-custom" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Add Borrowing Modal -->
     <div class="modal fade" id="newBorrowingModal" tabindex="-1" role="dialog" aria-labelledby="newBorrowingModalLabel" aria-hidden="true">
@@ -178,24 +195,6 @@
                         </div>
                         <button type="submit" class="btn btn-custom">Add Borrowing</button>
                     </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Confirmation Modal -->
-    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="confirmationMessage">
-                    <!-- Confirmation message will be populated here -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-custom" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -319,6 +318,38 @@
                 rows[i].style.display = match ? "" : "none";
             }
         }
+
+                // Function to update reservation status to "Collected"
+        function updateReservationStatus(reservationId, newStatus) {
+            $.ajax({
+                url: '@Url.Action("UpdateReservationStatus", "Librarian")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ reservationId: reservationId, newStatus: newStatus }),
+                success: function(data) {
+                    $('#confirmationMessage').text(data.message);
+                    $('#reservationDetailsModal').modal('hide'); // Hide the reservation details modal
+                    $('#confirmationModal').modal('show'); // Show the confirmation modal
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating reservation status:', error);
+                    $('#confirmationMessage').text('An error occurred while updating the reservation status.');
+                    $('#reservationDetailsModal').modal('hide'); // Hide the reservation details modal
+                    $('#confirmationModal').modal('show'); // Show the confirmation modal
+                }
+            });
+        }
+
+                // Event handlers for the buttons in the reservation details modal
+        $(document).on('click', '#collectedButton', function() {
+            const reservationId = $('#reservation-body-content').data('reservation-id');
+            updateReservationStatus(reservationId, 'Collected');
+        });
+
+        $(document).on('click', '#voidButton', function() {
+            const reservationId = $('#reservation-body-content').data('reservation-id');
+            updateReservationStatus(reservationId, 'Void');
+        });
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
