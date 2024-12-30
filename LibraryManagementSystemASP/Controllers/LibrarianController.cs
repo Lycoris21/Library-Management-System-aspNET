@@ -107,13 +107,11 @@ namespace LibraryManagementSystemASP.Controllers
             }
 
             // Add reservation
-            book.Quantity -= 1;
             _context.Reservations.Add(new Reservation
             {
                 UserId = user.UserId,
                 BookId = book.BookId,
                 Status = "Pending",
-                UpdatedAt = DateTime.Now
             });
             _context.SaveChanges();
 

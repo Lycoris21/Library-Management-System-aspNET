@@ -18,6 +18,7 @@ public partial class Borrowing
     public DateTime? ActualReturnDate { get; set; }
 
     public string Status { get; set; } = null!;
+
     public DateTime? UpdatedAt { get; set; }
 
     public virtual Book Book { get; set; } = null!;

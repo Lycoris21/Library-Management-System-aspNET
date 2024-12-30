@@ -75,7 +75,13 @@ public partial class LmsDbContext : DbContext
         {
             entity.HasKey(e => e.BorrowId).HasName("PK__Borrowin__262B57A05A911D3B");
 
-            entity.ToTable("Borrowing");
+            entity.ToTable("Borrowing", tb =>
+                {
+                    tb.HasTrigger("trg_Borrowing_Updated");
+                    tb.HasTrigger("trg_SetBorrowingReturnDate");
+                    tb.HasTrigger("trg_UpdateActualReturnDate");
+                    tb.HasTrigger("trg_UpdateBookQuantityOnBorrowingReturn");
+                });
 
             entity.Property(e => e.BorrowId).HasColumnName("borrow_id");
             entity.Property(e => e.ActualReturnDate)
@@ -86,13 +92,13 @@ public partial class LmsDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("borrow_date");
-            entity.Property(e => e.SupposedReturnDate)
-                .HasColumnType("datetime")
-                .HasColumnName("supposed_return_date");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("status");
+            entity.Property(e => e.SupposedReturnDate)
+                .HasColumnType("datetime")
+                .HasColumnName("supposed_return_date");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -114,22 +120,32 @@ public partial class LmsDbContext : DbContext
         {
             entity.HasKey(e => e.ReservationId).HasName("PK__Reservat__31384C29ACB1907C");
 
+            entity.ToTable(tb =>
+                {
+                    tb.HasTrigger("trg_DecrementBookQuantityOnReservation");
+                    tb.HasTrigger("trg_ReservationCollectedToBorrowing");
+                    tb.HasTrigger("trg_Reservations_Updated");
+                    tb.HasTrigger("trg_SetReservationCollectionDeadline");
+                    tb.HasTrigger("trg_UpdateBookQuantityOnReservationStatusChange");
+                    tb.HasTrigger("trg_UpdateCollectedAt");
+                });
+
             entity.Property(e => e.ReservationId).HasColumnName("reservation_id");
             entity.Property(e => e.BookId).HasColumnName("book_id");
+            entity.Property(e => e.CollectedOn)
+                .HasColumnType("datetime")
+                .HasColumnName("collected_on");
+            entity.Property(e => e.CollectionDeadline)
+                .HasColumnType("datetime")
+                .HasColumnName("collection_deadline");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
-            entity.Property(e => e.CollectionDeadline)
-                .HasColumnType("datetime")
-                .HasColumnName("collection_deadline");
-            entity.Property(e => e.CollectedOn)
-                .HasColumnType("datetime")
-                .HasColumnName("collected_on");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .IsUnicode(false)
-                .HasColumnName("status"); 
+                .HasColumnName("status");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
