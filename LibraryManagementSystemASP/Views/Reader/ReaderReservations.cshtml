@@ -1,4 +1,4 @@
-﻿@model IEnumerable<LibraryManagementSystemASP.Models.Reservation>
+﻿@model List<LibraryManagementSystemASP.Models.Reservation>
 
 @{
     ViewData["Title"] = "Reader Reservations";
@@ -71,11 +71,11 @@
                     {
                         <tr>
                             <td>@rowNumber</td>
-                            <td>@record.Book.Title</td>
-                            <td>@record.Status</td>
-                            <td>@record.CreatedAt?.ToString("g")</td>
-                            <td>@record.CollectionDeadline?.ToString("g")</td>
-                            <td>@record.CollectedOn?.ToString("g")</td>
+                            <td>@(record?.Book?.Title ?? "N/A")</td>
+                            <td>@(record?.Status ?? "N/A")</td>
+                            <td>@(record?.CreatedAt?.ToString("g") ?? "N/A")</td>
+                            <td>@(record?.CollectionDeadline?.ToString("g") ?? "N/A")</td>
+                            <td>@(record?.CollectedOn?.ToString("g") ?? "N/A")</td>
                             <td>
                                 <button class="btn btn-custom" data-toggle="modal" data-target="#reservationDetailsModal"
                                         onclick="loadDetails(@record.ReservationId)">
@@ -136,39 +136,33 @@
             }
 
             function loadDetails(reservationId) {
-                var reservation = @Html.Raw(Json.Serialize(Model.Single(r => r.ReservationId == reservationId)));
+                $.ajax({
+                    url: '@Url.Action("GetReservationDetails", "Reader")',
+                    type: 'GET',
+                    data: { reservationId: reservationId },
+                    success: function (data) {
+                        $('#modal-body-content').html(data);
+                        $('#modal-body-content').attr('data-reservation-id', reservationId);
 
-                var detailsHtml = `
-                    <p><strong>Row: </strong> ${reservation.ReservationId}</p>
-                    <p><strong>Book Title: </strong> ${reservation.Book.Title}</p>
-                    <p><strong>Book Author:</strong> ${reservation.Book.Author}</p>
-                    <p><strong>Book Category:</strong> ${reservation.Book.Category}</p>
-                    <p><strong>Book ISBN:</strong> ${reservation.Book.ISBN}</p>
-                    <p><strong>Book Publisher:</strong> ${reservation.Book.Publisher}</p>
-                    <p><strong>Book Published Year:</strong> ${reservation.Book.PublishedYear}</p>
-                    <p><strong>Reservation Status:</strong> ${reservation.Status}</p>
-                    <p><strong>Reserved On:</strong> ${reservation.CreatedAt ? reservation.CreatedAt.toString("g") : ""}</p>
-                    <p><strong>Collection Deadline:</strong> ${reservation.CollectionDeadline ? reservation.CollectionDeadline.toString("g") : ""}</p>
-                    <p><strong>Collected At:</strong> ${reservation.CollectedOn ? reservation.CollectedOn.toString("g") : ""}</p>
-                    <p><strong>Updated At:</strong> ${reservation.UpdatedAt ? reservation.UpdatedAt.toString("g") : ""}</p>
-                `;
+                        // Show or hide the "Cancel Reservation" button based on the reservation status
+                        if (data.includes('Reservation Status: Pending')) {
+                            document.getElementById('cancelReservationButton').style.display = 'inline-block';
+                        } else {
+                            document.getElementById('cancelReservationButton').style.display = 'none';
+                        }
 
-                document.getElementById('modal-body-content').innerHTML = detailsHtml;
-                document.getElementById('modal-body-content').setAttribute('data-reservation-id', reservation.ReservationId);
-
-                // Show or hide the "Cancel Reservation" button based on the reservation status
-                if (reservation.Status === "Pending") {
-                    document.getElementById('cancelReservationButton').style.display = 'inline-block';
-                } else {
-                    document.getElementById('cancelReservationButton').style.display = 'none';
-                }
-
-                $('#reservationDetailsModal').modal('show');
+                        $('#reservationDetailsModal').modal('show');
+                    },
+                    error: function () {
+                        $('#modal-body-content').html('<p>An error occurred while loading details.</p>');
+                        $('#reservationDetailsModal').modal('show');
+                    }
+                });
             }
 
             function confirmCancelReservation() {
                 if (confirm('Are you sure you want to cancel this reservation?')) {
-                    var reservationId = document.getElementById('modal-body-content').getAttribute('data-reservation-id');
+                    var reservationId = $('#modal-body-content').attr('data-reservation-id');
                     $.ajax({
                         url: '@Url.Action("CancelReservation", "Reader")',
                         type: 'POST',
