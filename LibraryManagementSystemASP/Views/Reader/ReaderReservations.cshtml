@@ -59,7 +59,7 @@
                         <th>Status</th>
                         <th>Reserved On</th>
                         <th>Collection Deadline</th>
-                        <th>Collected At</th>
+                        <th> Collected At</th>
                         <th>More Details</th>
                     </tr>
                 </thead>
@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal for Reservation Details -->
     <div class="modal fade" id="reservationDetailsModal" tabindex="-1" role="dialog" aria-labelledby="reservationDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -102,8 +102,45 @@
                     <!-- Details will be loaded here via JavaScript -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-custom-delete" id="cancelReservationButton" onclick="confirmCancelReservation()" style="display: none;">Cancel Reservation</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal for Canceling Reservation -->
+    <div class="modal fade" id="cancelConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="cancelConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelConfirmationModalLabel">Confirm Cancellation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to cancel this reservation?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-custom-delete" id="confirmCancelButton">Yes, Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message Modal -->
+    <div class="modal fade" id="successMessageModal" tabindex="-1" role="dialog" aria-labelledby="successMessageModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successMessageModalLabel">Success</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="successMessageBody">
+                    <!-- Success message will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -143,10 +180,10 @@
                     success: function (data) {
                         $('#modal-body-content').html(data);
                         $('#modal-body-content').attr('data-reservation-id', reservationId);
-                        $('#modal-body-content').attr('data-row-number', rowNumber);  // Store the row number
+                        $('#modal-row-number').text(rowNumber); 
 
-                        // Show or hide the "Cancel Reservation" button based on the reservation status
-                        if (data.includes('Reservation Status: Pending')) {
+                        const statusText = $('#modal-body-content').find('p:contains("Reservation Status:")').text();
+                        if (statusText.includes('Pending')) {
                             document.getElementById('cancelReservationButton').style.display = 'inline-block';
                         } else {
                             document.getElementById('cancelReservationButton').style.display = 'none';
@@ -162,27 +199,31 @@
             }
 
             function confirmCancelReservation() {
-                if (confirm('Are you sure you want to cancel this reservation?')) {
-                    var reservationId = $('#modal-body-content').attr('data-reservation-id');
-                    $.ajax({
-                        url: '@Url.Action("CancelReservation", "Reader")',
-                        type: 'POST',
-                        data: { reservationId: reservationId },
-                        success: function () {
-                            alert('Reservation cancelled successfully.');
-                            $('#reservationDetailsModal').modal('hide');
-                            location.reload();
-                        },
-                        error: function () {
-                            alert('An error occurred while cancelling the reservation.');
-                        }
-                    });
-                }
+                $('#reservationDetailsModal').modal('hide');
+                $('#cancelConfirmationModal').modal('show');
             }
 
-            // Ensure the modal closes properly
+            document.getElementById('confirmCancelButton').addEventListener('click', function() {
+                var reservationId = $('#modal-body-content').attr('data-reservation-id');
+                $.ajax({
+                    url: '@Url.Action("CancelReservation", "Reader")',
+                    type: 'POST',
+                    data: { reservationId: reservationId },
+                    success: function () {
+                        $('#successMessageBody').text('Reservation cancelled successfully.');
+                        $('#successMessageModal').modal('show'); 
+                        $('#reservationDetailsModal').modal('hide');
+                        $('#cancelConfirmationModal').modal('hide'); 
+                        location.reload();
+                    },
+                    error: function () {
+                        alert('An error occurred while cancelling the reservation.');
+                    }
+                });
+            });
+
             $('#reservationDetailsModal').on('hidden.bs.modal', function () {
-                $('#modal-body-content').empty(); // Clear the content when the modal is closed
+                $('#modal-body-content').empty(); 
             });
         </script>
         <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>

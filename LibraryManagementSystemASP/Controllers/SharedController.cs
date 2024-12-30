@@ -93,7 +93,6 @@ namespace LibraryManagementSystemASP.Controllers
         [HttpPost]
         public JsonResult ReserveBook(int id)
         {
-
             var user = UserSession.GetInstance().CurrentUser;
 
             var book = _context.Books.Include(b => b.Reservations).FirstOrDefault(b => b.BookId == id);
@@ -107,7 +106,8 @@ namespace LibraryManagementSystemASP.Controllers
                 return Json(new { title = "Out of Stock", message = "Sorry, this book is currently out of stock." });
             }
 
-            if (book.Reservations.Any(r => r.Status == "Pending"))
+            // Check if the current user has a pending reservation for this book
+            if (book.Reservations.Any(r => r.UserId == user.UserId && r.Status == "Pending"))
             {
                 return Json(new { title = "Already Reserved", message = "You already have a pending reservation for this book." });
             }

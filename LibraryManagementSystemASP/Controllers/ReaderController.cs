@@ -79,6 +79,7 @@ namespace LibraryManagementSystemASP.Controllers
         {
             var user = UserSession.GetInstance().CurrentUser;
             var reservations = _context.Reservations
+                .Include(r => r.Book)
                 .Where(r => r.UserId == user.UserId)
                 .OrderByDescending(r => r.Status == "Pending")
                 .ThenByDescending(r => r.UpdatedAt)
