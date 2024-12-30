@@ -77,7 +77,6 @@ public partial class LmsDbContext : DbContext
 
             entity.ToTable("Borrowing", tb =>
                 {
-                    tb.HasTrigger("trg_Borrowing_Updated");
                     tb.HasTrigger("trg_SetBorrowingReturnDate");
                     tb.HasTrigger("trg_UpdateActualReturnDate");
                     tb.HasTrigger("trg_UpdateBookQuantityOnBorrowingReturn");
@@ -124,7 +123,6 @@ public partial class LmsDbContext : DbContext
                 {
                     tb.HasTrigger("trg_DecrementBookQuantityOnReservation");
                     tb.HasTrigger("trg_ReservationCollectedToBorrowing");
-                    tb.HasTrigger("trg_Reservations_Updated");
                     tb.HasTrigger("trg_SetReservationCollectionDeadline");
                     tb.HasTrigger("trg_UpdateBookQuantityOnReservationStatusChange");
                     tb.HasTrigger("trg_UpdateCollectedAt");

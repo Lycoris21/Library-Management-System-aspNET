@@ -112,6 +112,10 @@ namespace LibraryManagementSystemASP.Controllers
                 UserId = user.UserId,
                 BookId = book.BookId,
                 Status = "Pending",
+                CollectedOn = DateTime.Now,
+                CollectionDeadline = DateTime.Now.AddDays(7),
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
             });
             _context.SaveChanges();
 

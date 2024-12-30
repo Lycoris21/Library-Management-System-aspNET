@@ -107,10 +107,12 @@ namespace LibraryManagementSystemASP.Controllers
         {
             if (ModelState.IsValid)
             {
+                var hashedPassword = PasswordHasher.HashPassword(model.Password);
+
                 var newUser = new User
                 {
                     Username = model.Username,
-                    Password = model.Password,
+                    Password = hashedPassword,
                     Role = model.Role,
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
