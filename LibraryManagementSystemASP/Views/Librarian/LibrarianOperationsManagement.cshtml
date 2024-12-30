@@ -172,11 +172,81 @@
         </div>
     </div>
 
+    <!-- Add Borrowing Modal -->
+    <div class="modal fade" id="newBorrowingModal" tabindex="-1" role="dialog" aria-labelledby="newBorrowingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newBorrowingModalLabel">New Borrowing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newBorrowingForm">
+                        <div class="mb-3">
+                            <label for="usernameInput" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="usernameInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bookTitleDropdown" class="form-label">Book Title</label>
+                            <select class="form-select" id="bookTitleDropdown" required>
+                                <option value="">Select a book</option>
+                                <!-- Book options will be populated here -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-custom">Add Borrowing</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-            function loadReservationDetails(reservationId) {
+
+            // Fetch available books and populate the dropdown
+        function loadAvailableBooks() {
+            fetch('/Librarian/GetAvailableBooks')
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById('bookTitleDropdown');
+                    dropdown.innerHTML = ''; // Clear existing options
+                    data.forEach(book => {
+                        const option = document.createElement('option');
+                        option.value = book.BookId;
+                        option.textContent = `${book.Title} (Available: ${book.Quantity})`;
+                        dropdown.appendChild(option);
+                    });
+                });
+        }
+
+        document.getElementById('newBorrowingModal').addEventListener('show.bs.modal', loadAvailableBooks);
+
+        // Handle form submission
+        document.getElementById('newBorrowingForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('usernameInput').value;
+            const bookId = document.getElementById('bookTitleDropdown').value;
+
+            fetch('/Librarian/AddBorrowing', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username, bookId: bookId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                location.reload();
+            });
+        });
+                    function loadReservationDetails(reservationId) {
             fetch(`/Librarian/GetReservationDetails/${reservationId}`)
                 .then(response => response.json())
                 .then(data => {
+                    if (data.success === false) {
+                        alert(data.message);
+                        return;
+                    }
                     document.getElementById("reservationId").textContent = data.reservationId;
                     document.getElementById("userId").textContent = data.userId;
                     document.getElementById("username").textContent = data.username;
@@ -187,6 +257,7 @@
                     document.getElementById("collectionDeadline").textContent = new Date(data.collectionDeadline).toLocaleString();
                     document.getElementById("lastUpdated").textContent = new Date(data.lastUpdated).toLocaleString();
 
+                    // Set up the button click handlers
                     document.getElementById("collectedButton").onclick = function() {
                         updateReservationStatus(data.reservationId, 'Collected');
                     };
@@ -200,8 +271,12 @@
             fetch(`/Librarian/GetBorrowingDetails/${borrowId}`)
                 .then(response => response.json())
                 .then(data => {
+                    if (data.success === false) {
+                        alert(data.message);
+                        return;
+                    }
                     document.getElementById("borrowId").textContent = data.borrowId;
-                    document.getElementById("borrowingUserId").textContent = data.userId;
+                    document.getElementById("borrowingUser Id").textContent = data.userId;
                     document.getElementById("borrowingUsername").textContent = data.username;
                     document.getElementById("borrowingBookId").textContent = data.bookId;
                     document.getElementById("borrowingBookTitle").textContent = data.bookTitle;
@@ -217,7 +292,7 @@
                 });
         }
 
-            function updateReservationStatus(reservationId, newStatus) {
+        function updateReservationStatus(reservationId, newStatus) {
             fetch(`/Librarian/UpdateReservationStatus`, {
                 method: 'POST',
                 headers: {

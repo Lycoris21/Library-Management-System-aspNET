@@ -98,6 +98,61 @@ namespace LibraryManagementSystemASP.Controllers
             return View(viewModel);
         }
 
+        [HttpGet]
+        public JsonResult GetReservationDetails(int reservationId)
+        {
+            var reservation = _context.Reservations
+                .Include(r => r.Book)
+                .Include(r => r.User)
+                .FirstOrDefault(r => r.ReservationId == reservationId);
+
+            if (reservation == null)
+            {
+                return Json(new { success = false, message = "Reservation not found." });
+            }
+
+            return Json(new
+            {
+                reservationId = reservation.ReservationId,
+                userId = reservation.UserId,
+                username = reservation.User.Username,
+                bookId = reservation.BookId,
+                bookTitle = reservation.Book.Title,
+                status = reservation.Status,
+                reservedOn = reservation.CreatedAt,
+                collectionDeadline = reservation.CollectionDeadline,
+                lastUpdated = reservation.UpdatedAt
+            });
+        }
+
+        [HttpGet]
+        public JsonResult GetBorrowingDetails(int borrowingId)
+        {
+            var borrowing = _context.Borrowings
+                .Include(b => b.Book)
+                .Include(b => b.User)
+                .FirstOrDefault(b => b.BorrowId == borrowingId);
+
+            if (borrowing == null)
+            {
+                return Json(new { success = false, message = "Borrowing not found." });
+            }
+
+            return Json(new
+            {
+                borrowId = borrowing.BorrowId,
+                userId = borrowing.UserId,
+                username = borrowing.User.Username,
+                bookId = borrowing.BookId,
+                bookTitle = borrowing.Book.Title,
+                status = borrowing.Status,
+                borrowedOn = borrowing.BorrowDate,
+                supposedReturnDate = borrowing.SupposedReturnDate,
+                actualReturnDate = borrowing.ActualReturnDate,
+                lastUpdated = borrowing.UpdatedAt
+            });
+        }
+
         [HttpPost]
         public JsonResult UpdateReservationStatus(int reservationId, string newStatus)
         {
@@ -122,6 +177,49 @@ namespace LibraryManagementSystemASP.Controllers
                 return Json(new { success = true, message = "Borrowing status updated to 'Returned'." });
             }
             return Json(new { success = false, message = "Borrowing not found." });
+        }
+
+        [HttpGet]
+        public JsonResult GetAvailableBooks()
+        {
+            var availableBooks = _context.Books
+                .Where(b => b.Status == "available" && b.Quantity > 0)
+                .Select(b => new { b.BookId, b.Title, b.Quantity })
+                .ToList();
+            return Json(availableBooks);
+        }
+
+        [HttpPost]
+        public JsonResult AddBorrowing([FromBody] Reservation request)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.UserId == request.UserId);
+            var book = _context.Books.FirstOrDefault(b => b.BookId == request.BookId);
+
+            if (user == null || book == null || book.Quantity <= 0)
+            {
+                return Json(new { success = false, message = "Invalid user or book selection." });
+            }
+
+            // Create a pending reservation
+            var reservation = new Reservation
+            {
+                UserId = user.UserId,
+                BookId = book.BookId,
+                Status = "Pending",
+                CreatedAt = DateTime.Now,
+                CollectionDeadline = DateTime.Now.AddDays(14),
+                UpdatedAt = DateTime.Now
+            };
+
+            _context.Reservations.Add(reservation);
+            _context.SaveChanges();
+
+            // Update the reservation status to collected
+            reservation.Status = "Collected";
+            reservation.UpdatedAt = DateTime.Now;
+            _context.SaveChanges();
+
+            return Json(new { success = true, message = "Borrowing added successfully." });
         }
     }
 }
