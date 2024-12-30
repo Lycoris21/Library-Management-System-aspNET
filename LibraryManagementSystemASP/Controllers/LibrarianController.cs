@@ -134,31 +134,54 @@ namespace LibraryManagementSystemASP.Controllers
         [HttpPost]
         public IActionResult UpdateReservationStatus([FromBody] UpdateReservationRequest request)
         {
-            if (request.ReservationId <= 0 || string.IsNullOrEmpty(request.NewStatus))
+            try
+            {
+                if (request.ReservationId <= 0 || string.IsNullOrEmpty(request.NewStatus))
+                {
+                    return BadRequest(new { message = "Invalid input." });
+                }
+
+                var reservation = _context.Reservations.FirstOrDefault(r => r.ReservationId == request.ReservationId);
+                if (reservation == null)
+                {
+                    return NotFound(new { message = "Reservation not found." });
+                }
+
+                // Update the reservation status
+                reservation.Status = request.NewStatus;
+                reservation.UpdatedAt = DateTime.Now;
+                _context.SaveChanges();
+
+                return Ok(new { message = $"Reservation status changed to '{request.NewStatus}'." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating the reservation.", error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult UpdateBorrowingStatus([FromBody] UpdateBorrowingRequest request)
+        {
+            if (request.BorrowingId <= 0 || string.IsNullOrEmpty(request.NewStatus))
             {
                 return BadRequest(new { message = "Invalid input." });
             }
 
-            var reservation = _context.Reservations.FirstOrDefault(r => r.ReservationId == request.ReservationId);
-            if (reservation == null)
+            var borrowing = _context.Borrowings.FirstOrDefault(b => b.BorrowId == request.BorrowingId);
+            if (borrowing == null)
             {
-                return NotFound(new { message = "Reservation not found." });
+                return NotFound(new { message = "Borrowing not found." });
             }
 
-            // Update the reservation status
-            reservation.Status = request.NewStatus;
-            reservation.UpdatedAt = DateTime.Now; // Update the timestamp
+            // Update the borrowing status
+            borrowing.Status = request.NewStatus;
+            borrowing.UpdatedAt = DateTime.Now; // Update the timestamp
             _context.SaveChanges();
 
-            return Ok(new { message = $"Reservation status changed to '{request.NewStatus}'." });
+            return Ok(new { message = $"Borrowing status changed to '{request.NewStatus}'." });
         }
 
-        // Model for the update request
-        public class UpdateReservationRequest
-        {
-            public int ReservationId { get; set; }
-            public string NewStatus { get; set; }
-        }   
 
         [HttpPost]
         public IActionResult AddBorrowing([FromBody] BorrowingRequest request)
@@ -207,6 +230,7 @@ namespace LibraryManagementSystemASP.Controllers
         {
             var availableBooks = _context.Books
                 .Where(b => b.Status == "Available" && b.Quantity > 0)
+                .Select(b => new { bookId = b.BookId, title = b.Title })
                 .ToList();
 
             return Json(availableBooks);

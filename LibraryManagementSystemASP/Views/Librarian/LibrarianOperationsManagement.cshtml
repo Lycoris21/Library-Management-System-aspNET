@@ -8,6 +8,7 @@
 <head>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         .table th, .table td {
             vertical-align: middle;
@@ -73,9 +74,9 @@
                             {
                                 <tr>
                                     <td>@(record?.User?.Username ?? "N/A")</td>
-                                    <td>@(record?.ReservationId)</td>
+                                    <td>@(record?.Book?.Title ?? "N/A")</td>
                                     <td>
-                                        <button class="btn btn-custom" data-toggle="modal" data-target="#reservationDetailsModal"
+                                        <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#reservationDetailsModal"
                                                 onclick="loadReservationDetails(@record.ReservationId)">
                                             More Details
                                         </button>
@@ -104,7 +105,7 @@
                                     <td>@(record.User.Username ?? "N/A")</td>
                                     <td>@(record.Book.Title ?? "N/A")</td>
                                     <td>
-                                        <button class="btn btn-custom" data-toggle="modal" data-target="#borrowingDetailsModal"
+                                        <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#borrowingDetailsModal"
                                                 onclick="loadBorrowingDetails(@record.BorrowId)">
                                             More Details
                                         </button>
@@ -160,7 +161,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
-                    < button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="confirmationMessage">
                     <!-- Confirmation message will be populated here -->
@@ -201,65 +202,71 @@
     </div>
 
     <script>
-        
-        function loadReservationDetails(reservationId) {
-                $.ajax({
-                    url: '@Url.Action("GetReservationDetails", "Librarian")',
-                    type: 'GET',
-                    data: { reservationId: reservationId },
-                    success: function (data) {
-                        $('#reservation-body-content').html(data);
-                        $('#reservation-body-content').attr('data-reservation-id', reservationId);
 
-                        $('#reservationDetailsModal').modal('show');
-                    },
-                    error: function () {
-                        $('#reservation-body-content').html('<p>An error occurred while loading details.</p>');
-                        $('#reservationDetailsModal').modal('show');
-                    }
-                });
-            }
+        function loadReservationDetails(reservationId) {
+            console.log('Loading reservation details for ID:', reservationId);
+            $.ajax({
+                url: '@Url.Action("GetReservationDetails", "Librarian")',
+                type: 'GET',
+                data: { reservationId: reservationId },
+                success: function (data) {
+                    console.log('Received data:', data);
+                    $('#reservation-body-content').html(data);
+                    $('#reservation-body-content').attr('data-reservation-id', reservationId);
+                    $('#reservationDetailsModal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                    $('#reservation-body-content').html('<p>An error occurred while loading details.</p>');
+                    $('#reservationDetailsModal').modal('show');
+                }
+            });
+        }
 
         function loadBorrowingDetails(borrowingId) {
+            console.log('Loading borrowing details for ID:', borrowingId);
                 $.ajax({
                     url: '@Url.Action("GetBorrowingDetails", "Librarian")',
                     type: 'GET',
                     data: { borrowingId: borrowingId },
                     success: function (data) {
+                        console.log('Received data:', data);
                         $('#borrowing-body-content').html(data);
                         $('#borrowing-body-content').attr('data-borrowing-id', borrowingId);
-
                         $('#borrowingDetailsModal').modal('show');
                     },
                     error: function () {
+                        console.error('Error:', error);
                         $('#borrowing-body-content').html('<p>An error occurred while loading details.</p>');
                         $('#borrowingDetailsModal').modal('show');
                     }
                 });
             }
-
-                    // Fetch available books and populate the dropdown
-                // Fetch available books and populate the dropdown
+        // Modify the dropdown loading function
         function loadAvailableBooks() {
+            console.log('Loading available books...');
             $.ajax({
                 url: '@Url.Action("GetAvailableBooks", "Librarian")',
                 type: 'GET',
                 success: function(data) {
+                    console.log('Books received:', data);
                     const dropdown = $('#bookTitleDropdown');
-                    dropdown.empty(); // Clear existing options
-                    dropdown.append('<option value="">Select a book</option>'); // Default option
-                    $.each(data, function(index, book) {
-                        dropdown.append($('<option></option>').attr('value', book.BookId).text(book.Title));
+                    dropdown.empty();
+                    dropdown.append('<option value="">Select a book</option>');
+                    data.forEach(book => {
+                        dropdown.append(`<option value="${book.bookId}">${book.title}</option>`);
                     });
                 },
-                error: function() {
-                    console.error('Error fetching available books.');
+                error: function(xhr, status, error) {
+                    console.error('Error loading books:', error);
                 }
             });
         }
 
-        // Load available books when the modal is shown
-        $('#newBorrowingModal').on('show.bs.modal', loadAvailableBooks);
+        // Call this when the modal opens
+        $('#newBorrowingModal').on('shown.bs.modal', function() {
+            loadAvailableBooks();
+        });
 
         // Handle form submission
         $('#newBorrowingForm').on('submit', function(event) {
@@ -319,8 +326,7 @@
             }
         }
 
-                // Function to update reservation status to "Collected"
-        function updateReservationStatus(reservationId, newStatus) {
+            function updateReservationStatus(reservationId, newStatus) {
             $.ajax({
                 url: '@Url.Action("UpdateReservationStatus", "Librarian")',
                 type: 'POST',
@@ -340,7 +346,27 @@
             });
         }
 
-                // Event handlers for the buttons in the reservation details modal
+        function updateBorrowingStatus(borrowingId, newStatus) {
+            $.ajax({
+                url: '@Url.Action("UpdateBorrowingStatus", "Librarian")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ borrowingId: borrowingId, newStatus: newStatus }),
+                success: function(data) {
+                    $('#confirmationMessage').text(data.message);
+                    $('#borrowingDetailsModal').modal('hide'); // Hide the borrowing details modal
+                    $('#confirmationModal').modal('show'); // Show the confirmation modal
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating borrowing status:', error);
+                    $('#confirmationMessage').text('An error occurred while updating the borrowing status.');
+                    $('#borrowingDetailsModal').modal('hide'); // Hide the borrowing details modal
+                    $('#confirmationModal').modal('show'); // Show the confirmation modal
+                }
+            });
+        }
+
+        // Event handlers for the buttons in the reservation details modal
         $(document).on('click', '#collectedButton', function() {
             const reservationId = $('#reservation-body-content').data('reservation-id');
             updateReservationStatus(reservationId, 'Collected');
@@ -350,7 +376,12 @@
             const reservationId = $('#reservation-body-content').data('reservation-id');
             updateReservationStatus(reservationId, 'Void');
         });
+
+        // Event handler for the returned button in the borrowing details modal
+        $(document).on('click', '#returnedButton', function() {
+            const borrowingId = $('#borrowing-body-content').data('borrowing-id');
+            updateBorrowingStatus(borrowingId, 'Returned');
+        });
     </script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 </html>
