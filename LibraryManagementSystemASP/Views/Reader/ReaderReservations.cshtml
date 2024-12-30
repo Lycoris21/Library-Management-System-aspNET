@@ -78,7 +78,7 @@
                             <td>@(record?.CollectedOn?.ToString("g") ?? "N/A")</td>
                             <td>
                                 <button class="btn btn-custom" data-toggle="modal" data-target="#reservationDetailsModal"
-                                        onclick="loadDetails(@record.ReservationId)">
+                                        onclick="loadDetails(@record.ReservationId, @rowNumber)">
                                     More Details
                                 </button>
                             </td>
@@ -135,7 +135,7 @@
                 });
             }
 
-            function loadDetails(reservationId) {
+            function loadDetails(reservationId, rowNumber) {
                 $.ajax({
                     url: '@Url.Action("GetReservationDetails", "Reader")',
                     type: 'GET',
@@ -143,6 +143,7 @@
                     success: function (data) {
                         $('#modal-body-content').html(data);
                         $('#modal-body-content').attr('data-reservation-id', reservationId);
+                        $('#modal-body-content').attr('data-row-number', rowNumber);  // Store the row number
 
                         // Show or hide the "Cancel Reservation" button based on the reservation status
                         if (data.includes('Reservation Status: Pending')) {
