@@ -118,7 +118,29 @@ namespace LibraryManagementSystemASP.Controllers
 
         public IActionResult ReaderBorrowing()
         {
-            return View();
+            var user = UserSession.GetInstance().CurrentUser;
+            var borrowings = _context.Borrowings
+                .Include(b => b.Book)
+                .Where(b => b.UserId == user.UserId)
+                .OrderByDescending(b => b.UpdatedAt)
+                .ToList();
+
+            return View(borrowings);
+        }
+
+        public IActionResult GetBorrowingDetails(int borrowingId)
+        {
+            var borrowing = _context.Borrowings
+                .Include(b => b.Book)
+                .Include(b => b.User)
+                .FirstOrDefault(b => b.BorrowId == borrowingId);
+
+            if (borrowing == null)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_BorrowingDetails", borrowing);
         }
 
     }

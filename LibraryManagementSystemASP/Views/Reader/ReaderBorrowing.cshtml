@@ -1,7 +1,165 @@
-﻿@{
+﻿@model List<LibraryManagementSystemASP.Models.Borrowing>
+
+@{
     ViewData["Title"] = "Reader Borrowing";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Reader Borrowing</h1>
-</div>
+<html>
+<head>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .btn-custom {
+            background-color: #316FA2;
+            color: white;
+        }
+
+        .btn-custom-delete {
+            background-color: #c82333;
+            color: white;
+        }
+
+        .table thead th {
+            background-color: #00233D;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            margin-top: 0;
+        }
+
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="px-5 h-100 mb-5">
+        <div class="row">
+            <div class="col-md-6 d-flex">
+                <input type="text" id="search" class="form-control ms-2" placeholder="Search records">
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <button class="btn btn-custom ms-2" onclick="filterRecords()">Search</button>
+            </div>
+        </div>
+        <h2 class="mt-3">Borrowing</h2>
+        <div class="table-container">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Row</th>
+                        <th>Book Title</th>
+                        <th>Status</th>
+                        <th>Borrowed On</th>
+                        <th>Supposed Return Date</th>
+                        <th>Actual Return Date</th>
+                        <th>More Details</th>
+                    </tr>
+                </thead>
+                <tbody id="recordTableBody">
+                    @{
+                        int rowNumber = 1;
+                    }
+                    @foreach (var record in Model)
+                    {
+                        <tr>
+                            <td>@rowNumber</td>
+                            <td>@(record?.Book?.Title ?? "N/A")</td>
+                            <td>@(record?.Status ?? "N/A")</td>
+                            <td>@(record?.BorrowDate?.ToString("g") ?? "N/A")</td>
+                            <td>@(record?.SupposedReturnDate?.ToString("g") ?? "N/A")</td>
+                            <td>@(record?.ActualReturnDate?.ToString("g") ?? "N/A")</td>
+                            <td>
+                                <button class="btn btn-custom" data-toggle="modal" data-target="#borrowingDetailsModal"
+                                        onclick="loadDetails(@record.BorrowId, @rowNumber)">
+                                    More Details
+                                </button>
+                            </td>
+                        </tr>
+                        rowNumber++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal for Borrowing Details -->
+    <div class="modal fade" id="borrowingDetailsModal" tabindex="-1" role="dialog" aria-labelledby="borrowingDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="borrowingDetailsModalLabel">Record Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modal-body-content">
+                    <!-- Details will be loaded here via JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @section Scripts {
+        <script>
+            document.getElementById('search').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    filterRecords();
+                }
+            });
+
+            function filterRecords() {
+                var searchValue = document.getElementById('search').value.toLowerCase();
+                var rows = document.querySelectorAll('#recordTableBody tr');
+
+                rows.forEach(function(row) {
+                    var cells = row.querySelectorAll('td');
+                    var matches = false;
+
+                    cells.forEach(function(cell) {
+                        if (cell.innerText.toLowerCase().includes(searchValue)) {
+                            matches = true;
+                        }
+                    });
+
+                    row.style.display = matches ? '' : 'none';
+                });
+            }
+
+            function loadDetails(borrowingId, rowNumber) {
+                $.ajax({
+                    url: '@Url.Action("GetBorrowingDetails", "Reader")',
+                    type: 'GET',
+                    data: { borrowingId: borrowingId },
+                    success: function (data) {
+                        $('#modal-body-content').html(data);
+                        $('#modal-body-content').attr('data-borrowing-id', borrowingId);
+                        $('#modal-row-number').text(rowNumber);
+
+                        $('#borrowingDetailsModal').modal('show');
+                    },
+                    error: function () {
+                        $('#modal-body-content').html('<p>An error occurred while loading details.</p>');
+                        $('#borrowingDetailsModal').modal('show');
+                    }
+                });
+            }
+
+            $('#borrowingDetailsModal').on('hidden.bs.modal', function () {
+                $('#modal-body-content').empty();
+            });
+        </script>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    }
+
+</body>
+</html>

@@ -75,12 +75,53 @@ namespace LibraryManagementSystemASP.Controllers
         
         public IActionResult LibrarianOperationsManagement()
         {
-            return View();
+            var reservations = _context.Reservations
+            .Include(r => r.Book)
+            .Include(r => r.User)
+            .Where(r => r.Status == "Pending")
+            .OrderByDescending(r => r.UpdatedAt)
+            .ToList();
+
+            var borrowings = _context.Borrowings
+                .Include(b => b.Book)
+                .Include(r => r.User)
+                .Where(b => b.Status == "Borrowed")
+                .OrderByDescending(b => b.UpdatedAt)
+                .ToList();
+
+            var viewModel = new LibrarianOperationsManagementViewModel
+            {
+                Reservations = reservations,
+                Borrowings = borrowings
+            };
+
+            return View(viewModel);
         }
 
-        public IActionResult LibrarianRecords()
+        [HttpPost]
+        public JsonResult UpdateReservationStatus(int reservationId, string newStatus)
         {
-            return View();
+            var reservation = _context.Reservations.FirstOrDefault(r => r.ReservationId == reservationId);
+            if (reservation != null)
+            {
+                reservation.Status = newStatus;
+                _context.SaveChanges();
+                return Json(new { success = true, message = $"Reservation status updated to '{newStatus}'." });
+            }
+            return Json(new { success = false, message = "Reservation not found." });
+        }
+
+        [HttpPost]
+        public JsonResult UpdateBorrowingStatus(int borrowingId)
+        {
+            var borrowing = _context.Borrowings.FirstOrDefault(b => b.BorrowId == borrowingId);
+            if (borrowing != null)
+            {
+                borrowing.Status = "Returned";
+                _context.SaveChanges();
+                return Json(new { success = true, message = "Borrowing status updated to 'Returned'." });
+            }
+            return Json(new { success = false, message = "Borrowing not found." });
         }
     }
 }
