@@ -9,9 +9,9 @@
         <p><strong>Book ID:</strong> @Model.Book.BookId</p>
         <p><strong>Book Title:</strong> @Model.Book.Title</p>
         <p><strong>Status:</strong> @Model.Status</p>
-        <p><strong>Reserved On:</strong> @Model.CreatedAt</p>
-        <p><strong>Collection Deadline:</strong> @Model.CollectionDeadline</p>
-        <p><strong>Updated At:</strong> @Model.UpdatedAt</p>
+        <p><strong>Reserved On:</strong> @Model.CreatedAt.ToString("g")</p>
+        <p><strong>Collection Deadline:</strong> @Model.CollectionDeadline.ToString("g")</p>
+        <p><strong>Updated At:</strong> @Model.UpdatedAt.ToString("g")</p>
             
     }
     else if (Model is LibraryManagementSystemASP.Models.Borrowing borrowing)
@@ -22,9 +22,9 @@
         <p><strong>Book ID:</strong> @Model.Book.BookId</p>
         <p><strong>Book Title:</strong> @Model.Book.Title</p>
         <p><strong>Status:</strong> @Model.Status</p>
-        <p><strong>Borrow Date:</strong> @Model.BorrowDate</p>
-        <p><strong>Supposed Return Date:</strong> @Model.SupposedReturnDate</p>
-        <p><strong>Actual Return Date:</strong> @Model.ActualReturnDate</p>
-        <p><strong>Updated At:</strong> @Model.UpdatedAt</p>
+        <p><strong>Borrow Date:</strong> @Model.BorrowDate.ToString("g")</p>
+        <p><strong>Supposed Return Date:</strong> @Model.SupposedReturnDate.ToString("g")</p>
+        <p><strong>Actual Return Date:</strong> @Model.ActualReturnDate.ToString("g")</p>
+        <p><strong>Updated At:</strong> @Model.UpdatedAt.ToString("g")</p>
     }
 </div>

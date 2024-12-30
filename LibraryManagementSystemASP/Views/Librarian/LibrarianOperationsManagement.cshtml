@@ -73,9 +73,9 @@
                             {
                                 <tr>
                                     <td>@(record?.User?.Username ?? "N/A")</td>
-                                    <td>@(record?.Book?.Title ?? "N/A")</td>
+                                    <td>@(record?.ReservationId)</td>
                                     <td>
-                                        <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#reservationDetailsModal"
+                                        <button class="btn btn-custom" data-toggle="modal" data-target="#reservationDetailsModal"
                                                 onclick="loadReservationDetails(@record.ReservationId)">
                                             More Details
                                         </button>
@@ -104,7 +104,7 @@
                                     <td>@(record.User.Username ?? "N/A")</td>
                                     <td>@(record.Book.Title ?? "N/A")</td>
                                     <td>
-                                        <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#borrowingDetailsModal"
+                                        <button class="btn btn-custom" data-toggle="modal" data-target="#borrowingDetailsModal"
                                                 onclick="loadBorrowingDetails(@record.BorrowId)">
                                             More Details
                                         </button>
@@ -126,16 +126,8 @@
                     <h5 class="modal-title" id="reservationDetailsModalLabel">Reservation Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <p><strong>Reservation ID:</strong> <span id="reservationId"></span></p>
-                    <p><strong>User ID:</strong> <span id="userId"></span></p>
-                    <p><strong>Username:</strong> <span id="username"></span></p>
-                    <p><strong>Book ID:</strong> <span id="bookId"></span></p>
-                    <p><strong>Book Title:</strong> <span id="bookTitle"></span></p>
-                    <p><strong>Reservation Status:</strong> <span id="reservationStatus"></span></p>
-                    <p><strong>Reserved On:</strong> <span id="reservedOn"></span></p>
-                    <p><strong>Collection Deadline:</strong> <span id="collectionDeadline"></span></p>
-                    <p><strong>Last Updated:</strong> <span id="lastUpdated"></span></p>
+                <div class="modal-body" id="reservation-body-content">
+                    <!-- Details will be loaded here via JavaScript -->
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-custom" id="collectedButton">Collected</button>
@@ -153,17 +145,8 @@
                     <h5 class="modal-title" id="borrowingDetailsModalLabel">Borrowing Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <p><strong>Borrowing ID:</strong> <span id="borrowId"></span></p>
-                    <p><strong>User ID:</strong> <span id="borrowingUserId"></span></p> <!-- Corrected ID -->
-                    <p><strong>Username:</strong> <span id="borrowingUsername"></span></p>
-                    <p><strong>Book ID:</strong> <span id="borrowingBookId"></span></p>
-                    <p><strong>Book Title:</strong> <span id="borrowingBookTitle"></span></p>
-                    <p><strong>Borrowing Status:</strong> <span id="borrowingStatus"></span></p>
-                    <p><strong>Borrowed On:</strong> <span id="borrowedOn"></span></p>
-                    <p><strong>Supposed Return Date:</strong> <span id="supposedReturnDate"></span></p>
-                    <p><strong>Actual Return Date:</strong> <span id="actualReturnDate"></span></p>
-                    <p><strong>Last Updated:</strong> <span id="borrowingLastUpdated"></span></p>
+                <div class="modal-body" id="borrowing-body-content">
+                    <!-- Details will be loaded here via JavaScript -->
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-custom" id="returnedButton">Returned</button> <!-- Use returnedButton -->
@@ -200,127 +183,112 @@
         </div>
     </div>
 
-    <script>
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="confirmationMessage">
+                    <!-- Confirmation message will be populated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-custom" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            // Fetch available books and populate the dropdown
-        function loadAvailableBooks() {
-            fetch('/Librarian/GetAvailableBooks')
-                .then(response => response.json())
-                .then(data => {
-                    const dropdown = document.getElementById('bookTitleDropdown');
-                    dropdown.innerHTML = ''; // Clear existing options
-                    data.forEach(book => {
-                        const option = document.createElement('option');
-                        option.value = book.BookId;
-                        option.textContent = `${book.Title} (Available: ${book.Quantity})`;
-                        dropdown.appendChild(option);
-                    });
+    <script>
+        
+        function loadReservationDetails(reservationId) {
+                $.ajax({
+                    url: '@Url.Action("GetReservationDetails", "Librarian")',
+                    type: 'GET',
+                    data: { reservationId: reservationId },
+                    success: function (data) {
+                        $('#reservation-body-content').html(data);
+                        $('#reservation-body-content').attr('data-reservation-id', reservationId);
+
+                        $('#reservationDetailsModal').modal('show');
+                    },
+                    error: function () {
+                        $('#reservation-body-content').html('<p>An error occurred while loading details.</p>');
+                        $('#reservationDetailsModal').modal('show');
+                    }
                 });
+            }
+
+        function loadBorrowingDetails(borrowingId) {
+                $.ajax({
+                    url: '@Url.Action("GetBorrowingDetails", "Librarian")',
+                    type: 'GET',
+                    data: { borrowingId: borrowingId },
+                    success: function (data) {
+                        $('#borrowing-body-content').html(data);
+                        $('#borrowing-body-content').attr('data-borrowing-id', borrowingId);
+
+                        $('#borrowingDetailsModal').modal('show');
+                    },
+                    error: function () {
+                        $('#borrowing-body-content').html('<p>An error occurred while loading details.</p>');
+                        $('#borrowingDetailsModal').modal('show');
+                    }
+                });
+            }
+
+                    // Fetch available books and populate the dropdown
+                // Fetch available books and populate the dropdown
+        function loadAvailableBooks() {
+            $.ajax({
+                url: '@Url.Action("GetAvailableBooks", "Librarian")',
+                type: 'GET',
+                success: function(data) {
+                    const dropdown = $('#bookTitleDropdown');
+                    dropdown.empty(); // Clear existing options
+                    dropdown.append('<option value="">Select a book</option>'); // Default option
+                    $.each(data, function(index, book) {
+                        dropdown.append($('<option></option>').attr('value', book.BookId).text(book.Title));
+                    });
+                },
+                error: function() {
+                    console.error('Error fetching available books.');
+                }
+            });
         }
 
-        document.getElementById('newBorrowingModal').addEventListener('show.bs.modal', loadAvailableBooks);
+        // Load available books when the modal is shown
+        $('#newBorrowingModal').on('show.bs.modal', loadAvailableBooks);
 
         // Handle form submission
-        document.getElementById('newBorrowingForm').addEventListener('submit', function(event) {
+        $('#newBorrowingForm').on('submit', function(event) {
             event.preventDefault();
-            const username = document.getElementById('usernameInput').value;
-            const bookId = document.getElementById('bookTitleDropdown').value;
+            const username = $('#usernameInput').val();
+            const bookId = $('#bookTitleDropdown').val();
 
-            fetch('/Librarian/AddBorrowing', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
+            $.ajax({
+                url: '@Url.Action("AddBorrowing", "Librarian")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ username: username, bookId: bookId }),
+                success: function(data) {
+                    // Show confirmation modal
+                    $('#confirmationMessage').text(data.message);
+                    $('#newBorrowingModal').modal('hide'); // Hide the add borrowing modal
+                    $('#confirmationModal').modal('show'); // Show the confirmation modal
                 },
-                body: JSON.stringify({ username: username, bookId: bookId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                location.reload();
+                error: function(xhr, status, error) {
+                    console.error('Error adding borrowing:', error);
+                    $('#confirmationMessage').text('An error occurred while adding the borrowing.');
+                    $('#newBorrowingModal').modal('hide'); // Hide the add borrowing modal
+                    $('#confirmationModal').modal('show'); // Show the confirmation modal
+                }
             });
         });
-                    function loadReservationDetails(reservationId) {
-            fetch(`/Librarian/GetReservationDetails/${reservationId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success === false) {
-                        alert(data.message);
-                        return;
-                    }
-                    document.getElementById("reservationId").textContent = data.reservationId;
-                    document.getElementById("userId").textContent = data.userId;
-                    document.getElementById("username").textContent = data.username;
-                    document.getElementById("bookId").textContent = data.bookId;
-                    document.getElementById("bookTitle").textContent = data.bookTitle;
-                    document.getElementById("reservationStatus").textContent = data.status;
-                    document.getElementById("reservedOn").textContent = new Date(data.reservedOn).toLocaleString();
-                    document.getElementById("collectionDeadline").textContent = new Date(data.collectionDeadline).toLocaleString();
-                    document.getElementById("lastUpdated").textContent = new Date(data.lastUpdated).toLocaleString();
 
-                    // Set up the button click handlers
-                    document.getElementById("collectedButton").onclick = function() {
-                        updateReservationStatus(data.reservationId, 'Collected');
-                    };
-                    document.getElementById("voidButton").onclick = function() {
-                        updateReservationStatus(data.reservationId, 'Void');
-                    };
-                });
-        }
-
-        function loadBorrowingDetails(borrowId) {
-            fetch(`/Librarian/GetBorrowingDetails/${borrowId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success === false) {
-                        alert(data.message);
-                        return;
-                    }
-                    document.getElementById("borrowId").textContent = data.borrowId;
-                    document.getElementById("borrowingUser Id").textContent = data.userId;
-                    document.getElementById("borrowingUsername").textContent = data.username;
-                    document.getElementById("borrowingBookId").textContent = data.bookId;
-                    document.getElementById("borrowingBookTitle").textContent = data.bookTitle;
-                    document.getElementById("borrowingStatus").textContent = data.status;
-                    document.getElementById("borrowedOn").textContent = new Date(data.borrowedOn).toLocaleString();
-                    document.getElementById("supposedReturnDate").textContent = new Date(data.supposedReturnDate).toLocaleString();
-                    document.getElementById("actualReturnDate").textContent = data.actualReturnDate ? new Date(data.actualReturnDate).toLocaleString() : "N/A";
-                    document.getElementById("borrowingLastUpdated").textContent = new Date(data.lastUpdated).toLocaleString();
-
-                    document.getElementById("returnedButton").onclick = function() {
-                        updateBorrowingStatus(data.borrowId);
-                    };
-                });
-        }
-
-        function updateReservationStatus(reservationId, newStatus) {
-            fetch(`/Librarian/UpdateReservationStatus`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ reservationId: reservationId, newStatus: newStatus })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                location.reload(); // Reload the page to see updated data
-            });
-        }
-
-        function updateBorrowingStatus(borrowId) {
-            fetch(`/Librarian/UpdateBorrowingStatus`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ borrowId: borrowId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                location.reload(); // Reload the page to see updated data
-            });
-        }
+        
 
         document.getElementById('search').addEventListener('keypress', function(event) {
             // Trigger search if Enter key is pressed
@@ -352,5 +320,6 @@
             }
         }
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 </html>

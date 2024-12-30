@@ -1,0 +1,14 @@
+﻿@model LibraryManagementSystemASP.Models.Borrowing
+
+<div>
+    <p><strong>Borrowing ID: </strong> @Model.BorrowId</p>
+    <p><strong>User ID:</strong> @Model.User.UserId</p>
+    <p><strong>Username:</strong> @Model.User.Username</p>
+    <p><strong>Book ID:</strong> @Model.Book.BookId</p>
+    <p><strong>Book Title:</strong> @Model.Book.Title</p>
+    <p><strong>Borrowing Status:</strong> @Model.Status</p>
+    <p><strong>Borrowed On:</strong> @Model.BorrowDate?.ToString("g")</p>
+    <p><strong>Supposed Return Date:</strong> @Model.SupposedReturnDate?.ToString("g")</p>
+    <p><strong>Actual Return Date:</strong> @Model.ActualReturnDate?.ToString("g")</p>
+    <p><strong>Updated At:</strong> @Model.UpdatedAt?.ToString("g")</p>
+</div>

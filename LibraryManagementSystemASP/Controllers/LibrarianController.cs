@@ -3,6 +3,7 @@ using LibraryManagementSystemASP.Data;
 using LibraryManagementSystemASP.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LibraryManagementSystemASP.Services;
 
 namespace LibraryManagementSystemASP.Controllers
 {
@@ -99,7 +100,7 @@ namespace LibraryManagementSystemASP.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetReservationDetails(int reservationId)
+        public IActionResult GetReservationDetails(int reservationId)
         {
             var reservation = _context.Reservations
                 .Include(r => r.Book)
@@ -108,25 +109,14 @@ namespace LibraryManagementSystemASP.Controllers
 
             if (reservation == null)
             {
-                return Json(new { success = false, message = "Reservation not found." });
+                return NotFound();
             }
 
-            return Json(new
-            {
-                reservationId = reservation.ReservationId,
-                userId = reservation.UserId,
-                username = reservation.User.Username,
-                bookId = reservation.BookId,
-                bookTitle = reservation.Book.Title,
-                status = reservation.Status,
-                reservedOn = reservation.CreatedAt,
-                collectionDeadline = reservation.CollectionDeadline,
-                lastUpdated = reservation.UpdatedAt
-            });
+            return PartialView("_ReservationDetailss", reservation);
         }
 
         [HttpGet]
-        public JsonResult GetBorrowingDetails(int borrowingId)
+        public IActionResult GetBorrowingDetails(int borrowingId)
         {
             var borrowing = _context.Borrowings
                 .Include(b => b.Book)
@@ -135,91 +125,67 @@ namespace LibraryManagementSystemASP.Controllers
 
             if (borrowing == null)
             {
-                return Json(new { success = false, message = "Borrowing not found." });
+                return NotFound();
             }
 
-            return Json(new
-            {
-                borrowId = borrowing.BorrowId,
-                userId = borrowing.UserId,
-                username = borrowing.User.Username,
-                bookId = borrowing.BookId,
-                bookTitle = borrowing.Book.Title,
-                status = borrowing.Status,
-                borrowedOn = borrowing.BorrowDate,
-                supposedReturnDate = borrowing.SupposedReturnDate,
-                actualReturnDate = borrowing.ActualReturnDate,
-                lastUpdated = borrowing.UpdatedAt
-            });
+            return PartialView("_BorrowingDetailss", borrowing);
         }
 
         [HttpPost]
-        public JsonResult UpdateReservationStatus(int reservationId, string newStatus)
+        public IActionResult AddBorrowing([FromBody] BorrowingRequest request)
         {
-            var reservation = _context.Reservations.FirstOrDefault(r => r.ReservationId == reservationId);
-            if (reservation != null)
+            if (string.IsNullOrEmpty(request.Username) || request.BookId <= 0)
             {
-                reservation.Status = newStatus;
-                _context.SaveChanges();
-                return Json(new { success = true, message = $"Reservation status updated to '{newStatus}'." });
-            }
-            return Json(new { success = false, message = "Reservation not found." });
-        }
-
-        [HttpPost]
-        public JsonResult UpdateBorrowingStatus(int borrowingId)
-        {
-            var borrowing = _context.Borrowings.FirstOrDefault(b => b.BorrowId == borrowingId);
-            if (borrowing != null)
-            {
-                borrowing.Status = "Returned";
-                _context.SaveChanges();
-                return Json(new { success = true, message = "Borrowing status updated to 'Returned'." });
-            }
-            return Json(new { success = false, message = "Borrowing not found." });
-        }
-
-        [HttpGet]
-        public JsonResult GetAvailableBooks()
-        {
-            var availableBooks = _context.Books
-                .Where(b => b.Status == "available" && b.Quantity > 0)
-                .Select(b => new { b.BookId, b.Title, b.Quantity })
-                .ToList();
-            return Json(availableBooks);
-        }
-
-        [HttpPost]
-        public JsonResult AddBorrowing([FromBody] Reservation request)
-        {
-            var user = _context.Users.FirstOrDefault(u => u.UserId == request.UserId);
-            var book = _context.Books.FirstOrDefault(b => b.BookId == request.BookId);
-
-            if (user == null || book == null || book.Quantity <= 0)
-            {
-                return Json(new { success = false, message = "Invalid user or book selection." });
+                return BadRequest(new { message = "Invalid input." });
             }
 
-            // Create a pending reservation
+            // Check if the user exists
+            var user = _context.Users.FirstOrDefault(u => u.Username == request.Username);
+            if (user == null)
+            {
+                return BadRequest(new { message = "User  not found." });
+            }
+
+            // Check if the book is available
+            var book = _context.Books.FirstOrDefault(b => b.BookId == request.BookId && b.Status == "Available" && b.Quantity > 0);
+            if (book == null)
+            {
+                return BadRequest(new { message = "Selected book is not available." });
+            }
+
+            // Create a new reservation
             var reservation = new Reservation
             {
-                UserId = user.UserId,
-                BookId = book.BookId,
+                UserId = user.UserId, // Now we can safely access UserId
+                BookId = request.BookId,
                 Status = "Pending",
                 CreatedAt = DateTime.Now,
-                CollectionDeadline = DateTime.Now.AddDays(14),
                 UpdatedAt = DateTime.Now
             };
 
             _context.Reservations.Add(reservation);
             _context.SaveChanges();
 
-            // Update the reservation status to collected
-            reservation.Status = "Collected";
-            reservation.UpdatedAt = DateTime.Now;
+            // Update the book status if necessary
+            book.Status = "Reserved"; // or any other logic you want to apply
             _context.SaveChanges();
 
-            return Json(new { success = true, message = "Borrowing added successfully." });
+            return Ok(new { message = "Borrowing has been added successfully." });
+        }
+
+        [HttpGet]
+        public IActionResult GetAvailableBooks()
+        {
+            var availableBooks = _context.Books
+                .Where(b => b.Status == "Available" && b.Quantity > 0)
+                .Select(b => new
+                {
+                    BookId = b.BookId,
+                    Title = b.Title
+                })
+                .ToList();
+
+            return Json(availableBooks);
         }
     }
 }

@@ -1,0 +1,13 @@
+﻿@model LibraryManagementSystemASP.Models.Reservation
+
+<div>
+    <p><strong>Reservation ID: </strong> @Model.ReservationId</p>
+    <p><strong>User ID:</strong> @Model.User.UserId</p>
+    <p><strong>Username:</strong> @Model.User.Username</p>
+    <p><strong>Book ID:</strong> @Model.Book.BookId</p>
+    <p><strong>Book Title: </strong> @Model.Book.Title</p>
+    <p><strong>Reservation Status:</strong> @Model.Status</p>
+    <p><strong>Reserved On:</strong> @Model.CreatedAt?.ToString("g")</p>
+    <p><strong>Collection Deadline:</strong> @Model.CollectionDeadline?.ToString("g")</p>
+    <p><strong>Updated At:</strong> @Model.UpdatedAt?.ToString("g")</p>
+</div>
