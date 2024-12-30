@@ -48,6 +48,7 @@
             </div>
             <div class="col-md-6 d-flex align-items-end">
                 <button class="btn btn-custom ms-2" onclick="filterRecords()">Search</button>
+                <button class="btn btn-custom ms-2" data-bs-toggle="modal" data-bs-target="#newBorrowingModal">New Borrowing</button>
             </div>
         </div>
 
@@ -172,8 +173,7 @@
     </div>
 
     <script>
-        function loadReservationDetails(reservationId) {
-            // Fetch reservation details from the server
+            function loadReservationDetails(reservationId) {
             fetch(`/Librarian/GetReservationDetails/${reservationId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -187,7 +187,6 @@
                     document.getElementById("collectionDeadline").textContent = new Date(data.collectionDeadline).toLocaleString();
                     document.getElementById("lastUpdated").textContent = new Date(data.lastUpdated).toLocaleString();
 
-                    // Set up the button click handlers
                     document.getElementById("collectedButton").onclick = function() {
                         updateReservationStatus(data.reservationId, 'Collected');
                     };
@@ -197,13 +196,12 @@
                 });
         }
 
-                function loadBorrowingDetails(borrowId) {
-            // Fetch borrowing details from the server
+        function loadBorrowingDetails(borrowId) {
             fetch(`/Librarian/GetBorrowingDetails/${borrowId}`)
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById("borrowId").textContent = data.borrowId; 
-                    document.getElementById("borrowingUser  Id").textContent = data.userId; 
+                    document.getElementById("borrowId").textContent = data.borrowId;
+                    document.getElementById("borrowingUserId").textContent = data.userId;
                     document.getElementById("borrowingUsername").textContent = data.username;
                     document.getElementById("borrowingBookId").textContent = data.bookId;
                     document.getElementById("borrowingBookTitle").textContent = data.bookTitle;
@@ -219,7 +217,7 @@
                 });
         }
 
-        function updateReservationStatus(reservationId, newStatus) {
+            function updateReservationStatus(reservationId, newStatus) {
             fetch(`/Librarian/UpdateReservationStatus`, {
                 method: 'POST',
                 headers: {
@@ -247,6 +245,36 @@
                 alert(data.message);
                 location.reload(); // Reload the page to see updated data
             });
+        }
+
+        document.getElementById('search').addEventListener('keypress', function(event) {
+            // Trigger search if Enter key is pressed
+            if (event.key === 'Enter') {
+                filterRecords();
+            }
+        });
+
+        function filterRecords() {
+            let search = document.getElementById("search").value.toLowerCase();
+            filterTable(search, 'reservationTableBody');
+            filterTable(search, 'borrowingTableBody');
+        }
+
+        function filterTable(search, tableId) {
+            let table = document.getElementById(tableId);
+            let rows = table.getElementsByTagName("tr");
+
+            for (let i = 0; i < rows.length; i++) {
+                let cells = rows[i].getElementsByTagName("td");
+                let match = false;
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].innerText.toLowerCase().includes(search)) {
+                        match = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = match ? "" : "none";
+            }
         }
     </script>
 </body>
