@@ -75,14 +75,44 @@ namespace LibraryManagementSystemASP.Controllers
             return View(viewModel);
         }
 
-        public IActionResult ReaderBrowseBooks()
-        {
-            return View();
-        }
-
         public IActionResult ReaderReservations()
         {
-            return View();
+            var user = UserSession.GetInstance().CurrentUser;
+            var reservations = _context.Reservations
+                .Where(r => r.UserId == user.UserId)
+                .OrderByDescending(r => r.Status == "Pending")
+                .ThenByDescending(r => r.UpdatedAt)
+                .ToList();
+
+            return View(reservations);
+        }
+
+        public IActionResult GetReservationDetails(int reservationId)
+        {
+            var reservation = _context.Reservations
+                .Include(r => r.Book)
+                .Include(r => r.User)
+                .FirstOrDefault(r => r.ReservationId == reservationId);
+
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_ReservationDetails", reservation);
+        }
+
+        [HttpPost]
+        public IActionResult CancelReservation(int reservationId)
+        {
+            var reservation = _context.Reservations.FirstOrDefault(r => r.ReservationId == reservationId);
+            if (reservation != null && reservation.Status == "Pending")
+            {
+                reservation.Status = "Void";
+                _context.SaveChanges();
+            }
+
+            return Ok();
         }
 
         public IActionResult ReaderBorrowing()
